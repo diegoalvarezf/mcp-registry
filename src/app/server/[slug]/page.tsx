@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { getServer } from "@/lib/servers";
+import { SubmittedBanner } from "./SubmittedBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +18,7 @@ export default async function ServerPage({ params }: { params: { slug: string } 
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
+      <Suspense><SubmittedBanner /></Suspense>
       {/* Header */}
       <div className="mb-10">
         <div className="flex items-center gap-3 mb-3">

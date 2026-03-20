@@ -1,0 +1,101 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { submitServerSchema } from "@/lib/validations";
+
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function parse(server: any) {
+  return {
+    ...server,
+    tags: JSON.parse(server.tags),
+    tools: JSON.parse(server.tools),
+    clients: JSON.parse(server.clients),
+  };
+}
+
+// GET /api/servers — public API
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const query = searchParams.get("q") ?? undefined;
+  const tag = searchParams.get("tag") ?? undefined;
+  const client = searchParams.get("client") ?? undefined;
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "50"), 100);
+
+  const where: any = {};
+  if (tag) where.tags = { contains: tag };
+  if (client) where.clients = { contains: client };
+
+  const servers = await prisma.server.findMany({
+    where,
+    orderBy: [{ featured: "desc" }, { stars: "desc" }, { createdAt: "desc" }],
+    take: limit,
+  });
+
+  let results = servers.map(parse);
+
+  if (query) {
+    const q = query.toLowerCase();
+    results = results.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.description.toLowerCase().includes(q) ||
+        s.tags.some((t: string) => t.includes(q)) ||
+        s.tools.some((t: string) => t.includes(q))
+    );
+  }
+
+  return NextResponse.json({ servers: results, total: results.length });
+}
+
+// POST /api/servers — submit a new server
+export async function POST(req: NextRequest) {
+  const body = await req.json().catch(() => null);
+  if (!body) {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const parsed = submitServerSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: parsed.error.flatten() },
+      { status: 422 }
+    );
+  }
+
+  const data = parsed.data;
+  const slug = slugify(data.name);
+
+  const existing = await prisma.server.findUnique({ where: { slug } });
+  if (existing) {
+    return NextResponse.json(
+      { error: `A server with slug "${slug}" already exists` },
+      { status: 409 }
+    );
+  }
+
+  const server = await prisma.server.create({
+    data: {
+      slug,
+      name: data.name,
+      description: data.description,
+      longDesc: data.longDesc ?? null,
+      repoUrl: data.repoUrl,
+      npmPackage: data.npmPackage ?? null,
+      authorName: data.authorName,
+      authorUrl: data.authorUrl || null,
+      license: data.license,
+      version: data.version,
+      tags: JSON.stringify(data.tags),
+      tools: JSON.stringify(data.tools),
+      clients: JSON.stringify(data.clients),
+      transport: data.transport,
+    },
+  });
+
+  return NextResponse.json({ server: parse(server) }, { status: 201 });
+}

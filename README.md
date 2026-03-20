@@ -36,10 +36,10 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Browse and search servers
 - [x] Server detail pages
 - [x] Tag and client filters
-- [ ] Submit a server (form)
+- [x] Submit a server (form + API)
+- [x] Public API (`GET /api/servers`, `POST /api/servers`)
 - [ ] Ratings and reviews
 - [ ] GitHub OAuth for publishing
-- [ ] API endpoint for programmatic access (`GET /api/servers`)
 - [ ] CLI: `mcp publish`
 
 ## Contributing
