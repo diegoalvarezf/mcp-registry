@@ -1,6 +1,8 @@
 import { prisma } from "./db";
 import type { McpServer } from "./types";
 
+const PAGE_SIZE = 24;
+
 function parse(server: any): McpServer {
   return {
     ...server,
@@ -15,36 +17,42 @@ export async function getServers(opts?: {
   tag?: string;
   client?: string;
   featured?: boolean;
-}): Promise<McpServer[]> {
+  page?: number;
+}): Promise<{ servers: McpServer[]; total: number; pages: number }> {
+  const page = Math.max(1, opts?.page ?? 1);
   const where: any = {};
   if (opts?.featured) where.featured = true;
   if (opts?.tag) where.tags = { contains: opts.tag };
   if (opts?.client) where.clients = { contains: opts.client };
+  if (opts?.query) {
+    where.OR = [
+      { name: { contains: opts.query } },
+      { description: { contains: opts.query } },
+      { tags: { contains: opts.query } },
+      { tools: { contains: opts.query } },
+    ];
+  }
 
-  const servers = await prisma.server.findMany({
-    where,
-    orderBy: [{ featured: "desc" }, { stars: "desc" }, { createdAt: "desc" }],
-    include: { reviews: { select: { rating: true } } },
+  const [total, servers] = await Promise.all([
+    prisma.server.count({ where }),
+    prisma.server.findMany({
+      where,
+      orderBy: [{ featured: "desc" }, { stars: "desc" }, { createdAt: "desc" }],
+      include: { reviews: { select: { rating: true } } },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+  ]);
+
+  const parsed = servers.map((s) => {
+    const reviews = s.reviews;
+    const avgRating = reviews.length
+      ? Math.round((reviews.reduce((a, r) => a + r.rating, 0) / reviews.length) * 10) / 10
+      : undefined;
+    return { ...parse(s), avgRating, reviewCount: reviews.length };
   });
 
-  return servers
-    .map((s) => {
-      const reviews = s.reviews;
-      const avgRating = reviews.length
-        ? Math.round((reviews.reduce((a, r) => a + r.rating, 0) / reviews.length) * 10) / 10
-        : undefined;
-      return { ...parse(s), avgRating, reviewCount: reviews.length };
-    })
-    .filter((s) => {
-      if (!opts?.query) return true;
-      const q = opts.query.toLowerCase();
-      return (
-        s.name.toLowerCase().includes(q) ||
-        s.description.toLowerCase().includes(q) ||
-        s.tags.some((t) => t.toLowerCase().includes(q)) ||
-        s.tools.some((t) => t.toLowerCase().includes(q))
-      );
-    });
+  return { servers: parsed, total, pages: Math.ceil(total / PAGE_SIZE) };
 }
 
 export async function getServer(
