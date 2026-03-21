@@ -649,7 +649,7 @@ const servers = [
     description: "Intelligent context middleware — semantic search and memory for your codebase.",
     longDesc: "Indexes your codebase with embeddings, builds a dependency graph, and injects relevant context dynamically. Keeps architectural decisions persistent across sessions.",
     repoUrl: "https://github.com/diegotorres/context-pilot",
-    authorName: "Diego",
+    authorName: "sallyheller",
     license: "MIT",
     version: "0.1.0",
     tags: JSON.stringify(["context", "embeddings", "memory", "community"]),
