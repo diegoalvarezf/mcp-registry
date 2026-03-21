@@ -3,7 +3,6 @@ import { useState } from "react";
 import type { McpServer } from "@/lib/types";
 
 function getGithubAvatar(repoUrl: string, authorUrl?: string | null): string | null {
-  // Intenta primero authorUrl (si es GitHub), luego repoUrl
   for (const url of [authorUrl, repoUrl]) {
     if (!url) continue;
     const match = url.match(/github\.com\/([^\/]+)/);
@@ -12,11 +11,23 @@ function getGithubAvatar(repoUrl: string, authorUrl?: string | null): string | n
   return null;
 }
 
+function buildVSCodeUri(server: McpServer): string | null {
+  if (!server.configJson) return null;
+  try {
+    const config = JSON.parse(server.configJson);
+    const payload = JSON.stringify({ name: server.slug, ...config });
+    return `vscode:mcp/install?${encodeURIComponent(payload)}`;
+  } catch {
+    return null;
+  }
+}
+
 export function ServerCard({ server, featured }: { server: McpServer; featured?: boolean }) {
   const avatar = getGithubAvatar(server.repoUrl, server.authorUrl);
   const [copied, setCopied] = useState(false);
+  const vscodeUri = buildVSCodeUri(server);
 
-  function handleInstall(e: React.MouseEvent) {
+  function handleLocalInstall(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
     navigator.clipboard.writeText(`mcp install ${server.slug}`).then(() => {
@@ -87,27 +98,44 @@ export function ServerCard({ server, featured }: { server: McpServer; featured?:
         </div>
       </a>
 
-      {/* Install button */}
+      {/* Install buttons */}
       {server.installCmd && (
-        <div className="px-4 sm:px-5 pb-4 pt-0">
+        <div className="px-4 sm:px-5 pb-4 pt-0 flex gap-2">
+          {/* VS Code */}
+          {vscodeUri ? (
+            <a
+              href={vscodeUri}
+              onClick={(e) => e.stopPropagation()}
+              title="Install in VS Code"
+              className={`flex items-center justify-center gap-1.5 flex-1 py-2 rounded-lg text-xs font-medium transition-colors ${
+                featured
+                  ? "bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30"
+                  : "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
+              }`}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" className="shrink-0">
+                <path d="M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 19.88V4.12a1.5 1.5 0 0 0-.85-1.533zM16.498 20.38l-7.3-6.663L16.5 7.02z"/>
+              </svg>
+              VS Code
+            </a>
+          ) : null}
+
+          {/* Local / CLI */}
           <button
-            onClick={handleInstall}
-            className={`flex items-center justify-center gap-2 w-full py-2 rounded-lg text-xs font-medium transition-colors ${
+            onClick={handleLocalInstall}
+            title="Copy CLI install command"
+            className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors ${
+              vscodeUri ? "flex-1" : "w-full"
+            } ${
               featured
                 ? "bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30"
                 : "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
             }`}
           >
             {copied ? (
-              <>
-                <span>✓</span>
-                <span>Copied!</span>
-              </>
+              <><span>✓</span><span>Copied!</span></>
             ) : (
-              <>
-                <span>↓</span>
-                <span className="font-mono">mcp install {server.slug}</span>
-              </>
+              <><span>↓</span><span className="font-mono">Local</span></>
             )}
           </button>
         </div>
