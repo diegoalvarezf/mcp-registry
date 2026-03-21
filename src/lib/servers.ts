@@ -56,6 +56,20 @@ export async function getServers(opts?: {
   return { servers: parsed, total, pages: Math.ceil(total / PAGE_SIZE) };
 }
 
+export async function getServersBySlugs(slugs: string[]): Promise<McpServer[]> {
+  const servers = await prisma.server.findMany({
+    where: { slug: { in: slugs } },
+    include: { reviews: { select: { rating: true } } },
+  });
+  return servers.map((s) => {
+    const reviews = s.reviews;
+    const avgRating = reviews.length
+      ? Math.round((reviews.reduce((a, r) => a + r.rating, 0) / reviews.length) * 10) / 10
+      : undefined;
+    return { ...parse(s), avgRating, reviewCount: reviews.length };
+  });
+}
+
 export async function getServer(
   slug: string
 ): Promise<(McpServer & { reviews: { id: string; rating: number; comment: string | null; author: string; createdAt: Date }[] }) | null> {

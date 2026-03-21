@@ -19,6 +19,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <span>MCPHub</span>
           </a>
           <div className="flex items-center gap-3 sm:gap-6 text-sm text-gray-400">
+            <a href="/stacks" className="hover:text-white transition-colors hidden sm:block">Stacks</a>
             <a href="/submit" className="hover:text-white transition-colors">Submit</a>
             <a href="/install-cli" className="hover:text-white transition-colors hidden sm:block">CLI</a>
             <a

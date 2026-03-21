@@ -2,6 +2,7 @@ import { getServers } from "@/lib/servers";
 import { ServerCard } from "@/components/ServerCard";
 import { SearchBar } from "@/components/SearchBar";
 import { Pagination } from "@/components/Pagination";
+import { STACKS } from "@/lib/stacks";
 
 export const dynamic = "force-dynamic";
 
@@ -95,6 +96,31 @@ export default async function HomePage({
           ))}
         </div>
       </div>
+
+      {/* Stacks */}
+      {!isFiltered && (
+        <section className="mb-12 sm:mb-14">
+          <div className="flex items-center justify-between mb-4 sm:mb-5">
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Popular stacks</h2>
+            <a href="/stacks" className="text-xs text-blue-400 hover:underline">View all →</a>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
+            {STACKS.map((stack) => (
+              <a
+                key={stack.slug}
+                href={`/stacks/${stack.slug}`}
+                className="group flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-800 bg-gray-900 hover:border-gray-600 hover:bg-gray-800 transition-all text-center"
+              >
+                <span className="text-2xl">{stack.icon}</span>
+                <span className="text-xs text-gray-300 group-hover:text-white transition-colors font-medium leading-tight">
+                  {stack.name}
+                </span>
+                <span className="text-xs text-gray-600">{stack.servers.length} servers</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Featured */}
       {!isFiltered && featured.length > 0 && (
