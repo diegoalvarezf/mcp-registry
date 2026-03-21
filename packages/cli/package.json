@@ -1,0 +1,29 @@
+{
+  "name": "@mcphub/cli",
+  "version": "0.1.0",
+  "description": "Install and manage MCP servers across Claude Code, Cursor, and Continue",
+  "bin": {
+    "mcp": "./dist/index.js"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "inquirer": "^9.3.7",
+    "chalk": "^5.3.0",
+    "ora": "^8.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/inquirer": "^9.0.7",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

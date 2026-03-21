@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+export const envVarSchema = z.object({
+  name: z.string().min(1).max(60),
+  description: z.string().max(200),
+  required: z.boolean(),
+  example: z.string().max(100).optional(),
+});
+
 export const submitServerSchema = z.object({
   name: z.string().min(2).max(60),
   description: z.string().min(20).max(280),
@@ -14,6 +21,10 @@ export const submitServerSchema = z.object({
   tools: z.array(z.string().min(1).max(60)).min(1).max(20),
   clients: z.array(z.enum(["claude-code", "cursor", "continue", "other"])).min(1),
   transport: z.enum(["stdio", "sse", "http"]).default("stdio"),
+  installCmd: z.string().max(300).optional(),
+  configJson: z.string().max(2000).optional(),
+  envVars: z.array(envVarSchema).max(20).optional(),
+  category: z.enum(["official", "community", "enterprise"]).optional(),
 });
 
 export type SubmitServerInput = z.infer<typeof submitServerSchema>;

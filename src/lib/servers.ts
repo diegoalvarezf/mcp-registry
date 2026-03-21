@@ -9,6 +9,7 @@ function parse(server: any): McpServer {
     tags: JSON.parse(server.tags),
     tools: JSON.parse(server.tools),
     clients: JSON.parse(server.clients),
+    envVars: server.envVars ? JSON.parse(server.envVars) : null,
   };
 }
 

@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { getServer } from "@/lib/servers";
 import { SubmittedBanner } from "./SubmittedBanner";
 import { ReviewSection } from "@/components/ReviewSection";
+import { CopyButton } from "@/components/CopyButton";
 
 export const dynamic = "force-dynamic";
 
@@ -57,31 +58,68 @@ export default async function ServerPage({ params }: { params: { slug: string } 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main content */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Install */}
-          {server.npmPackage && (
+          {/* Install with MCPHub CLI */}
+          {server.installCmd && (
             <section>
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
-                Install
+                Install with MCPHub CLI
               </h2>
-              <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 font-mono text-sm">
-                <span className="text-gray-500">$ </span>
-                <span className="text-green-400">npm install -g {server.npmPackage}</span>
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 font-mono text-sm flex items-center justify-between gap-4">
+                <div>
+                  <span className="text-gray-500">$ </span>
+                  <span className="text-green-400">mcp install {server.slug}</span>
+                </div>
+                <CopyButton text={`mcp install ${server.slug}`} />
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Instala y configura automáticamente en Claude Code, Cursor y Continue.{" "}
+                <a href="/install-cli" className="text-blue-400 hover:underline">Obtener MCPHub CLI →</a>
+              </p>
+            </section>
+          )}
+
+          {/* Manual install command */}
+          {server.installCmd && (
+            <section>
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
+                Manual Install
+              </h2>
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 font-mono text-sm flex items-center justify-between gap-4">
+                <div>
+                  <span className="text-gray-500">$ </span>
+                  <span className="text-blue-400">{server.installCmd}</span>
+                </div>
+                <CopyButton text={server.installCmd} />
               </div>
             </section>
           )}
 
-          {/* Add to Claude Code */}
-          <section>
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
-              Add to Claude Code
-            </h2>
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 font-mono text-sm">
-              <span className="text-gray-500">$ </span>
-              <span className="text-blue-400">
-                claude mcp add {server.slug} -- {server.npmPackage ?? server.slug} serve
-              </span>
-            </div>
-          </section>
+          {/* Env vars */}
+          {server.envVars && server.envVars.length > 0 && (
+            <section>
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
+                Required Environment Variables
+              </h2>
+              <div className="space-y-2">
+                {server.envVars.map((ev) => (
+                  <div key={ev.name} className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-mono text-sm text-yellow-400">{ev.name}</span>
+                      {ev.required && (
+                        <span className="text-xs bg-red-500/20 text-red-400 border border-red-500/30 px-1.5 py-0.5 rounded">
+                          required
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-400">{ev.description}</p>
+                    {ev.example && (
+                      <p className="text-xs text-gray-600 font-mono mt-1">e.g. {ev.example}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Tools */}
           <section>

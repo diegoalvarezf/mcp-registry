@@ -23,12 +23,17 @@ model Server {
   tools       String   // JSON array of MCP tool names
   clients     String   // JSON array: "claude-code", "cursor", "continue"
   transport   String   @default("stdio") // stdio | sse | http
-  stars       Int      @default(0)
-  verified    Boolean  @default(false)
-  featured    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  reviews     Review[]
+  stars         Int      @default(0)
+  verified      Boolean  @default(false)
+  featured      Boolean  @default(false)
+  installCmd    String?  // "npx -y @modelcontextprotocol/server-github"
+  configJson    String?  // JSON template para claude_desktop_config.json
+  envVars       String?  // JSON: [{name, description, required, example}]
+  category      String?  // "official" | "community" | "enterprise"
+  downloadCount Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  reviews       Review[]
 }
 
 model Review {
