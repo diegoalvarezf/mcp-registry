@@ -116,10 +116,11 @@ export default async function HomePage({
           <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto">
             {t.heroDesc}
           </p>
-          <div className="mt-6 flex items-center justify-center">
+          <div className="mt-6 flex flex-col items-center gap-2">
             <div className="bg-gray-900 border border-gray-800 rounded-lg px-5 py-2.5 font-mono text-sm text-gray-300">
               <span className="text-gray-600 select-none">$ </span>npx @sallyheller/mcphub install <span className="text-blue-400">github</span>
             </div>
+            <p className="text-xs text-gray-600">auto-installs to Claude Code, Cursor, Continue — whatever you have</p>
           </div>
 
           {/* Compatible clients — scrolling ticker */}

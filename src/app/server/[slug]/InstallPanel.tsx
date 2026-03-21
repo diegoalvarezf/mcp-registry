@@ -79,9 +79,12 @@ export function InstallPanel({ slug, installCmd, configJson, envVars }: Props) {
     <div className="space-y-2">
       {/* Primary: CLI command */}
       <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 flex items-center justify-between gap-4">
-        <div className="font-mono text-sm min-w-0 truncate">
-          <span className="text-gray-600 select-none">$ </span>
-          <span className="text-white">{npxCmd}</span>
+        <div className="min-w-0">
+          <div className="font-mono text-sm truncate">
+            <span className="text-gray-600 select-none">$ </span>
+            <span className="text-white">{npxCmd}</span>
+          </div>
+          <p className="text-xs text-gray-600 mt-1">auto-installs to all detected clients</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {vscodeUri && (
