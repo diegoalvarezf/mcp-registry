@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Field = { label: string; name: string; type?: string; placeholder: string; required?: boolean; hint?: string };
-
 const CLIENTS = ["claude-code", "cursor", "continue", "other"];
 
 export function SubmitForm() {
@@ -13,9 +11,19 @@ export function SubmitForm() {
   const [error, setError] = useState<string | null>(null);
   const [clients, setClients] = useState<string[]>([]);
   const [transport, setTransport] = useState("stdio");
+  const [envVars, setEnvVars] = useState<{ name: string; description: string; required: boolean; example: string }[]>([]);
 
   const toggleClient = (c: string) =>
     setClients((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+
+  const addEnvVar = () =>
+    setEnvVars((prev) => [...prev, { name: "", description: "", required: true, example: "" }]);
+
+  const updateEnvVar = (i: number, field: string, value: string | boolean) =>
+    setEnvVars((prev) => prev.map((ev, idx) => idx === i ? { ...ev, [field]: value } : ev));
+
+  const removeEnvVar = (i: number) =>
+    setEnvVars((prev) => prev.filter((_, idx) => idx !== i));
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -37,6 +45,14 @@ export function SubmitForm() {
       tools: String(fd.get("tools")).split(",").map((t) => t.trim()).filter(Boolean),
       clients,
       transport,
+      installCmd: fd.get("installCmd") || undefined,
+      envVars: envVars.filter((ev) => ev.name.trim()).map((ev) => ({
+        name: ev.name.trim(),
+        description: ev.description.trim(),
+        required: ev.required,
+        example: ev.example.trim() || undefined,
+      })),
+      category: fd.get("category") || undefined,
     };
 
     const res = await fetch("/api/servers", {
@@ -58,6 +74,7 @@ export function SubmitForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Basic info */}
       <Field name="name" label="Server name" placeholder="my-mcp-server" required />
       <Field
         name="description"
@@ -66,20 +83,15 @@ export function SubmitForm() {
         required
         hint="Shown in search results"
       />
-      <Field
-        name="repoUrl"
-        label="GitHub repository"
-        placeholder="https://github.com/user/repo"
-        required
-      />
-      <Field name="npmPackage" label="npm package" placeholder="@scope/package-name" />
+      <Field name="repoUrl" label="GitHub repository" placeholder="https://github.com/user/repo" required />
+      <Field name="npmPackage" label="npm package" placeholder="@scope/package-name" hint="Leave empty if not published to npm" />
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field name="authorName" label="Author" placeholder="your-github-username" required />
         <Field name="authorUrl" label="Author URL" placeholder="https://github.com/you" />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field name="version" label="Version" placeholder="0.1.0" />
         <Field name="license" label="License" placeholder="MIT" />
       </div>
@@ -98,6 +110,28 @@ export function SubmitForm() {
         required
         hint="Comma-separated tool names exposed by this server"
       />
+
+      {/* Install command */}
+      <Field
+        name="installCmd"
+        label="Install command"
+        placeholder="npx -y @scope/my-mcp-server"
+        hint="The exact command to run the server (used by mcp install)"
+      />
+
+      {/* Category */}
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-1.5">Category</label>
+        <select
+          name="category"
+          className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors"
+        >
+          <option value="">Select category</option>
+          <option value="official">Official</option>
+          <option value="community">Community</option>
+          <option value="enterprise">Enterprise</option>
+        </select>
+      </div>
 
       {/* Compatible clients */}
       <div>
@@ -139,6 +173,69 @@ export function SubmitForm() {
             >
               {t}
             </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Env vars */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-300">
+            Environment variables <span className="text-gray-500 font-normal">(optional)</span>
+          </label>
+          <button
+            type="button"
+            onClick={addEnvVar}
+            className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+          >
+            + Add variable
+          </button>
+        </div>
+        {envVars.length === 0 && (
+          <p className="text-xs text-gray-500">API keys or tokens required by this server.</p>
+        )}
+        <div className="space-y-3">
+          {envVars.map((ev, i) => (
+            <div key={i} className="bg-gray-900 border border-gray-800 rounded-lg p-4 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  value={ev.name}
+                  onChange={(e) => updateEnvVar(i, "name", e.target.value)}
+                  placeholder="VARIABLE_NAME"
+                  className="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm font-mono text-yellow-400 placeholder-gray-600 focus:outline-none focus:border-blue-500"
+                />
+                <input
+                  value={ev.example}
+                  onChange={(e) => updateEnvVar(i, "example", e.target.value)}
+                  placeholder="Example value"
+                  className="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <input
+                value={ev.description}
+                onChange={(e) => updateEnvVar(i, "description", e.target.value)}
+                placeholder="Description — what is this variable for?"
+                className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-blue-500"
+              />
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={ev.required}
+                    onChange={(e) => updateEnvVar(i, "required", e.target.checked)}
+                    className="rounded"
+                  />
+                  Required
+                </label>
+                <button
+                  type="button"
+                  onClick={() => removeEnvVar(i)}
+                  className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       </div>

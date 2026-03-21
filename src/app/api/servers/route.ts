@@ -94,6 +94,9 @@ export async function POST(req: NextRequest) {
       tools: JSON.stringify(data.tools),
       clients: JSON.stringify(data.clients),
       transport: data.transport,
+      installCmd: data.installCmd ?? null,
+      envVars: data.envVars ? JSON.stringify(data.envVars) : null,
+      category: data.category ?? null,
     },
   });
 
