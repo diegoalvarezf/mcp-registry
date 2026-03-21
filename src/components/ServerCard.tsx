@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import type { McpServer } from "@/lib/types";
 
 function getGithubAvatar(repoUrl: string, authorUrl?: string | null): string | null {
@@ -13,6 +14,16 @@ function getGithubAvatar(repoUrl: string, authorUrl?: string | null): string | n
 
 export function ServerCard({ server, featured }: { server: McpServer; featured?: boolean }) {
   const avatar = getGithubAvatar(server.repoUrl, server.authorUrl);
+  const [copied, setCopied] = useState(false);
+
+  function handleInstall(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard.writeText(`mcp install ${server.slug}`).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
 
   return (
     <div className={`group rounded-xl border transition-all hover:border-gray-600 hover:-translate-y-0.5 flex flex-col ${
@@ -79,18 +90,26 @@ export function ServerCard({ server, featured }: { server: McpServer; featured?:
       {/* Install button */}
       {server.installCmd && (
         <div className="px-4 sm:px-5 pb-4 pt-0">
-          <a
-            href={`/server/${server.slug}`}
-            onClick={(e) => e.stopPropagation()}
+          <button
+            onClick={handleInstall}
             className={`flex items-center justify-center gap-2 w-full py-2 rounded-lg text-xs font-medium transition-colors ${
               featured
                 ? "bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30"
                 : "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
             }`}
           >
-            <span>↓</span>
-            <span className="font-mono">mcp install {server.slug}</span>
-          </a>
+            {copied ? (
+              <>
+                <span>✓</span>
+                <span>Copied!</span>
+              </>
+            ) : (
+              <>
+                <span>↓</span>
+                <span className="font-mono">mcp install {server.slug}</span>
+              </>
+            )}
+          </button>
         </div>
       )}
     </div>
