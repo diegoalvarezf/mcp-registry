@@ -126,15 +126,10 @@ export default async function HomePage({
           <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto">
             {t.heroDesc}
           </p>
-          <div className="mt-5 flex items-center justify-center gap-3 flex-wrap">
-            <div className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 font-mono text-sm text-green-400">
-              npm install -g @mcphub/cli
+          <div className="mt-6 flex items-center justify-center">
+            <div className="bg-gray-900 border border-gray-800 rounded-lg px-5 py-2.5 font-mono text-sm text-gray-300">
+              <span className="text-gray-600 select-none">$ </span>npx @mcphub/cli install <span className="text-blue-400">github</span>
             </div>
-            <span className="text-gray-600 text-sm">{t.heroOr}</span>
-            <div className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 font-mono text-sm text-blue-400">
-              npx @mcphub/cli install github
-            </div>
-            <a href="/install-cli" className="text-sm text-blue-400 hover:underline">{t.allCommands}</a>
           </div>
 
           {/* Compatible clients — scrolling ticker */}
