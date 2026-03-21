@@ -159,6 +159,19 @@ export default async function HomePage({
 
 
 
+          {/* Submit banner */}
+          {!isFiltered && (
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-8 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex-1 text-sm text-gray-400">
+                <span className="text-white font-medium">MCP Servers</span> connect Claude to external tools and data sources.
+                Run <code className="bg-gray-800 px-1.5 py-0.5 rounded text-green-400 text-xs">mcp install github</code> to add any server instantly.
+              </div>
+              <a href="/submit" className="shrink-0 text-xs text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-lg hover:bg-blue-500/10 transition-colors">
+                Submit a server →
+              </a>
+            </div>
+          )}
+
           {/* Featured */}
           {!isFiltered && featuredServers.servers.length > 0 && (
             <section className="mb-10">

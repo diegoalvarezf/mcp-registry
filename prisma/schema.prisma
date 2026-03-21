@@ -31,6 +31,7 @@ model Server {
   envVars       String?  // JSON: [{name, description, required, example}]
   category      String?  // "official" | "community" | "enterprise"
   downloadCount Int      @default(0)
+  createdBy     String?  // githubLogin of submitter
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   reviews       Review[]

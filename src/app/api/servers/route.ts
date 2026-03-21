@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { submitServerSchema } from "@/lib/validations";
+import { auth } from "@/lib/auth";
 
 function slugify(name: string): string {
   return name
@@ -54,6 +55,7 @@ export async function GET(req: NextRequest) {
 
 // POST /api/servers — submit a new server
 export async function POST(req: NextRequest) {
+  const session = await auth();
   const body = await req.json().catch(() => null);
   if (!body) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
@@ -97,6 +99,7 @@ export async function POST(req: NextRequest) {
       installCmd: data.installCmd ?? null,
       envVars: data.envVars ? JSON.stringify(data.envVars) : null,
       category: data.category ?? null,
+      createdBy: session?.user?.githubLogin ?? null,
     },
   });
 
