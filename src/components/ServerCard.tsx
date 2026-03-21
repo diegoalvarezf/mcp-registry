@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import type { McpServer } from "@/lib/types";
+import { useT } from "@/lib/use-t";
 
 function getGithubAvatar(repoUrl: string, authorUrl?: string | null): string | null {
   for (const url of [authorUrl, repoUrl]) {
@@ -23,6 +24,7 @@ function buildVSCodeUri(server: McpServer): string | null {
 }
 
 export function ServerCard({ server, featured }: { server: McpServer; featured?: boolean }) {
+  const t = useT();
   const avatar = getGithubAvatar(server.repoUrl, server.authorUrl);
   const [copied, setCopied] = useState(false);
   const vscodeUri = buildVSCodeUri(server);
@@ -133,9 +135,9 @@ export function ServerCard({ server, featured }: { server: McpServer; featured?:
             }`}
           >
             {copied ? (
-              <><span>✓</span><span>Copied!</span></>
+              <><span>✓</span><span>{t.copied}</span></>
             ) : (
-              <><span>↓</span><span className="font-mono">Local</span></>
+              <><span>↓</span><span className="font-mono">{t.install}</span></>
             )}
           </button>
         </div>

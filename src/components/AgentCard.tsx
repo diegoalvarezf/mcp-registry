@@ -2,6 +2,7 @@
 import { useState } from "react";
 import type { Skill } from "@prisma/client";
 import { parseTags } from "@/lib/skills-db";
+import { useT } from "@/lib/use-t";
 
 function getGithubAvatar(authorUrl?: string | null): string | null {
   if (!authorUrl) return null;
@@ -10,6 +11,7 @@ function getGithubAvatar(authorUrl?: string | null): string | null {
 }
 
 export function AgentCard({ skill, featured }: { skill: Skill; featured?: boolean }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
   const tags = parseTags(skill);
   const avatar = getGithubAvatar(skill.authorUrl);
@@ -80,7 +82,7 @@ export function AgentCard({ skill, featured }: { skill: Skill; featured?: boolea
               ? "bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/30"
               : "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
           }`}>
-          {copied ? <><span>✓</span><span>Copied!</span></> : <><span>↓</span><span className="font-mono">Install</span></>}
+          {copied ? <><span>✓</span><span>{t.copied}</span></> : <><span>↓</span><span className="font-mono">{t.install}</span></>}
         </button>
       </div>
     </div>

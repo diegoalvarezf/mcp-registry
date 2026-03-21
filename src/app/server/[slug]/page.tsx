@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { getServer } from "@/lib/servers";
+import { getT } from "@/lib/i18n";
 import { SubmittedBanner } from "./SubmittedBanner";
 import { ReviewSection } from "@/components/ReviewSection";
 import { CopyButton } from "@/components/CopyButton";
@@ -8,8 +10,11 @@ import { CopyButton } from "@/components/CopyButton";
 export const dynamic = "force-dynamic";
 
 export default async function ServerPage({ params }: { params: { slug: string } }) {
-  const server = await getServer(params.slug);
+  const [server, cookieStore] = await Promise.all([getServer(params.slug), cookies()]);
   if (!server) notFound();
+
+  const lang = cookieStore.get("lang")?.value ?? "en";
+  const t = getT(lang);
 
   const clientLabels: Record<string, string> = {
     "claude-code": "Claude Code",
@@ -23,7 +28,7 @@ export default async function ServerPage({ params }: { params: { slug: string } 
       <Suspense><SubmittedBanner /></Suspense>
       {/* Back */}
       <a href="/" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-300 transition-colors mb-6">
-        ← Back to MCPHub
+        {t.backToMcpHub}
       </a>
       {/* Header */}
       <div className="mb-8 sm:mb-10">
@@ -31,18 +36,18 @@ export default async function ServerPage({ params }: { params: { slug: string } 
           <h1 className="text-2xl sm:text-3xl font-bold">{server.name}</h1>
           {server.verified && (
             <span className="text-xs bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full">
-              ✓ Verified
+              {t.verifiedBadge}
             </span>
           )}
           {server.featured && (
             <span className="text-xs bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded-full">
-              ★ Featured
+              {t.featuredBadge}
             </span>
           )}
         </div>
         <p className="text-gray-400 text-base sm:text-lg mb-4">{server.description}</p>
         <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-500">
-          <span>by {server.authorUrl
+          <span>{t.by} {server.authorUrl
             ? <a href={server.authorUrl} className="text-blue-400 hover:underline">{server.authorName}</a>
             : server.authorName
           }</span>
@@ -66,7 +71,7 @@ export default async function ServerPage({ params }: { params: { slug: string } 
           {server.installCmd && (
             <section>
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
-                Install with MCPHub CLI
+                {t.installWithCli}
               </h2>
               <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 font-mono text-sm flex items-center justify-between gap-4">
                 <div>
@@ -76,8 +81,8 @@ export default async function ServerPage({ params }: { params: { slug: string } 
                 <CopyButton text={`mcp install ${server.slug}`} />
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                Instala y configura automáticamente en Claude Code, Cursor y Continue.{" "}
-                <a href="/install-cli" className="text-blue-400 hover:underline">Obtener MCPHub CLI →</a>
+                {t.installAutoDesc}{" "}
+                <a href="/install-cli" className="text-blue-400 hover:underline">{t.getCli}</a>
               </p>
             </section>
           )}
@@ -86,7 +91,7 @@ export default async function ServerPage({ params }: { params: { slug: string } 
           {server.installCmd && (
             <section>
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
-                Manual Install
+                {t.manualInstall}
               </h2>
               <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 font-mono text-sm flex items-center justify-between gap-4">
                 <div>
@@ -102,7 +107,7 @@ export default async function ServerPage({ params }: { params: { slug: string } 
           {server.envVars && server.envVars.length > 0 && (
             <section>
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
-                Required Environment Variables
+                {t.requiredEnvVars}
               </h2>
               <div className="space-y-2">
                 {server.envVars.map((ev) => (
@@ -111,7 +116,7 @@ export default async function ServerPage({ params }: { params: { slug: string } 
                       <span className="font-mono text-sm text-yellow-400">{ev.name}</span>
                       {ev.required && (
                         <span className="text-xs bg-red-500/20 text-red-400 border border-red-500/30 px-1.5 py-0.5 rounded">
-                          required
+                          {t.required}
                         </span>
                       )}
                     </div>
@@ -128,7 +133,7 @@ export default async function ServerPage({ params }: { params: { slug: string } 
           {/* Tools */}
           <section>
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
-              MCP Tools ({server.tools.length})
+              {t.mcpTools} ({server.tools.length})
             </h2>
             <div className="space-y-2">
               {server.tools.map((tool) => (
@@ -146,7 +151,7 @@ export default async function ServerPage({ params }: { params: { slug: string } 
           {server.longDesc && (
             <section>
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">
-                About
+                {t.about}
               </h2>
               <p className="text-gray-400 leading-relaxed">{server.longDesc}</p>
             </section>
@@ -162,16 +167,16 @@ export default async function ServerPage({ params }: { params: { slug: string } 
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors"
             >
-              <span>⬡</span> View on GitHub
+              <span>⬡</span> {t.viewOnGitHub}
             </a>
 
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Transport</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">{t.transport}</p>
               <span className="font-mono text-sm text-gray-300">{server.transport}</span>
             </div>
 
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Compatible with</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">{t.compatibleWith}</p>
               <div className="flex flex-wrap gap-1.5">
                 {server.clients.map((c) => (
                   <span key={c} className="text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded-md border border-gray-700">
@@ -182,7 +187,7 @@ export default async function ServerPage({ params }: { params: { slug: string } 
             </div>
 
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Tags</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">{t.tags}</p>
               <div className="flex flex-wrap gap-1.5">
                 {server.tags.map((tag) => (
                   <a
