@@ -644,6 +644,57 @@ const servers = [
     ]),
   },
   {
+    slug: "microsoft-graph",
+    name: "Microsoft 365",
+    description: "Access SharePoint, Teams, OneDrive, Outlook and the full Microsoft 365 suite via Graph API.",
+    longDesc: "Connect your AI agent to the Microsoft 365 ecosystem. Read and write SharePoint sites, lists, and documents. Search across Teams messages and channels. Manage files in OneDrive. Send emails and calendar events via Outlook. Built on Microsoft Graph API.",
+    repoUrl: "https://github.com/microsoftgraph/msgraph-sdk-python",
+    npmPackage: "@modelcontextprotocol/server-microsoft-graph",
+    authorName: "Microsoft",
+    authorUrl: "https://github.com/microsoft",
+    license: "MIT",
+    version: "1.0.0",
+    tags: JSON.stringify(["microsoft", "sharepoint", "teams", "enterprise", "office365"]),
+    tools: JSON.stringify([
+      "sharepoint_get_site",
+      "sharepoint_list_items",
+      "sharepoint_create_item",
+      "sharepoint_update_item",
+      "sharepoint_search",
+      "sharepoint_get_document",
+      "onedrive_list_files",
+      "onedrive_upload_file",
+      "onedrive_download_file",
+      "teams_list_channels",
+      "teams_send_message",
+      "teams_search_messages",
+      "outlook_send_email",
+      "outlook_list_events",
+      "outlook_create_event",
+    ]),
+    clients: JSON.stringify(["claude-code", "cursor", "continue", "openclaw"]),
+    transport: "stdio",
+    stars: 890,
+    verified: true,
+    featured: true,
+    category: "enterprise",
+    installCmd: "npx -y @modelcontextprotocol/server-microsoft-graph",
+    configJson: JSON.stringify({
+      command: "npx",
+      args: ["-y", "@modelcontextprotocol/server-microsoft-graph"],
+      env: {
+        AZURE_TENANT_ID: "${AZURE_TENANT_ID}",
+        AZURE_CLIENT_ID: "${AZURE_CLIENT_ID}",
+        AZURE_CLIENT_SECRET: "${AZURE_CLIENT_SECRET}",
+      },
+    }),
+    envVars: JSON.stringify([
+      { name: "AZURE_TENANT_ID", description: "Your Azure Active Directory tenant ID", required: true, example: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" },
+      { name: "AZURE_CLIENT_ID", description: "Azure app registration client ID", required: true, example: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" },
+      { name: "AZURE_CLIENT_SECRET", description: "Azure app registration client secret", required: true, example: "your-secret-value" },
+    ]),
+  },
+  {
     slug: "context-pilot",
     name: "Context Pilot",
     description: "Intelligent context middleware — semantic search and memory for your codebase.",
@@ -1280,6 +1331,52 @@ Output only the PR description in the format above. No preamble.`,
     published: true,
     installCount: 1100,
   },
+  {
+    slug: "sharepoint-search",
+    name: "SharePoint Search",
+    type: "prompt",
+    description: "Search and extract information from SharePoint sites, lists, and documents.",
+    content: `# SharePoint Search
+
+Search for and extract information from SharePoint using the Microsoft 365 MCP server.
+
+## When to use
+- Finding documents, pages, or content across SharePoint sites
+- Querying SharePoint lists (task lists, issue trackers, data tables)
+- Extracting structured data from SharePoint for analysis
+- Looking up corporate policies, procedures, or documentation
+
+## How to search
+
+### By document content
+Use \`sharepoint_search\` with a keyword query. Be specific — SharePoint search is broad.
+
+### By site and list
+Use \`sharepoint_get_site\` then \`sharepoint_list_items\` to browse structured data.
+
+### By document
+Use \`sharepoint_get_document\` with a known file path or document ID.
+
+## Output format
+
+Summarize what was found:
+- **Source:** site name and URL
+- **Content:** the relevant information extracted
+- **Last modified:** date and author if available
+
+If multiple results, rank by relevance to the query. Quote directly from documents when precision matters.
+
+## Notes
+- Requires Microsoft 365 MCP server configured with Azure credentials
+- Search scope is limited to sites the authenticated account has access to
+- Large documents will be summarized — ask for specific sections if needed`,
+    tags: JSON.stringify(["microsoft", "sharepoint", "enterprise", "search"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: true,
+    published: true,
+    installCount: 340,
+  },
 ];
 
 const agents = [
@@ -1651,6 +1748,65 @@ You are a backend engineer specializing in API design. You've been the consumer 
     featured: false,
     published: true,
     installCount: 490,
+  },
+  {
+    slug: "enterprise-assistant",
+    name: "Enterprise Assistant",
+    type: "agent",
+    description: "An enterprise-focused assistant for Microsoft 365, SharePoint, and corporate environments.",
+    content: `---
+name: Enterprise Assistant
+description: An enterprise-focused assistant for Microsoft 365, SharePoint, and corporate environments.
+---
+
+You are an enterprise assistant specialized in Microsoft 365 environments. You help developers and knowledge workers interact with SharePoint, Teams, OneDrive, and Outlook through AI tooling.
+
+## Context
+
+Enterprise environments have constraints that don't exist in typical developer workflows:
+- **Permissions matter.** Not every user can access every site or document. You always check access before assuming something is available.
+- **Data sensitivity.** Corporate data may be confidential, regulated, or subject to retention policies. You handle it carefully and flag when something looks sensitive.
+- **Governance.** IT policies exist for a reason. You work within them, not around them.
+
+## What you help with
+
+### SharePoint
+- Finding documents, pages, and content across sites
+- Reading and querying SharePoint lists (task trackers, project logs, data tables)
+- Summarizing long documents or policy pages
+- Comparing document versions or extracting specific sections
+
+### Microsoft Teams
+- Searching message history for decisions, links, or discussions
+- Summarizing channel conversations
+- Drafting messages or announcements
+
+### OneDrive & Outlook
+- Locating and retrieving files
+- Drafting and sending emails
+- Managing calendar events and meeting scheduling
+
+### Cross-service
+- Connecting information across SharePoint, Teams, and email
+- Building summaries of project status from multiple sources
+
+## How you communicate
+
+Clear and professional. You match the tone of the corporate environment. You don't use jargon unless it's standard in the Microsoft 365 ecosystem.
+
+When you can't find something, you say so and suggest where else to look. When a request touches sensitive data, you flag it.
+
+## What you avoid
+
+- Modifying or deleting content without explicit confirmation
+- Sharing information across organizational boundaries without checking permissions
+- Bypassing access controls or suggesting workarounds to IT policies`,
+    tags: JSON.stringify(["microsoft", "enterprise", "sharepoint", "teams"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: true,
+    published: true,
+    installCount: 280,
   },
 ];
 
