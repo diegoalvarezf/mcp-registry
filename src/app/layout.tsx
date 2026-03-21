@@ -58,14 +58,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 Sign in
               </a>
             )}
-            <a
-              href="https://github.com/sallyheller/mcp-registry"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-md transition-colors hidden sm:block"
-            >
-              GitHub
-            </a>
           </div>
         </nav>
         <main>{children}</main>
