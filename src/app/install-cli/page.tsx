@@ -6,6 +6,29 @@ export const metadata: Metadata = {
   description: "Install MCP servers with one command across Claude Code, Cursor, and Continue.",
 };
 
+const commands = [
+  {
+    cmd: "mcp install github",
+    desc: "Install a server — auto-detects clients, asks for required env vars",
+  },
+  {
+    cmd: "mcp remove github",
+    desc: "Remove a server from one or all clients",
+  },
+  {
+    cmd: "mcp search database",
+    desc: "Search servers in the MCPHub registry",
+  },
+  {
+    cmd: "mcp list",
+    desc: "List all installed servers across every client",
+  },
+  {
+    cmd: "mcp sync --team my-team",
+    desc: "Install all servers configured for your team (great for onboarding)",
+  },
+];
+
 export default function InstallCliPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
@@ -32,15 +55,11 @@ export default function InstallCliPage() {
         </div>
       </section>
 
-      {/* Usage */}
+      {/* Commands */}
       <section className="mb-10">
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Usage</h2>
+        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Commands</h2>
         <div className="space-y-3">
-          {[
-            { cmd: "mcp install github", desc: "Install a server — detects your clients automatically" },
-            { cmd: "mcp search database", desc: "Search servers in MCPHub" },
-            { cmd: "mcp list", desc: "List installed servers across all clients" },
-          ].map(({ cmd, desc }) => (
+          {commands.map(({ cmd, desc }) => (
             <div key={cmd} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
               <div className="flex items-center justify-between gap-4 mb-1">
                 <div className="font-mono text-sm">
@@ -52,6 +71,35 @@ export default function InstallCliPage() {
               <p className="text-sm text-gray-500">{desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Teams */}
+      <section className="mb-10">
+        <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-5">
+          <h3 className="font-semibold text-white mb-1">Team sync</h3>
+          <p className="text-sm text-gray-400 mb-4">
+            Create a team on MCPHub, add the servers your team uses, and share one command.
+            Every new developer runs it and gets the full stack configured in under a minute.
+          </p>
+          <div className="space-y-2">
+            <div className="bg-gray-900/80 rounded-lg p-3 font-mono text-sm">
+              <span className="text-gray-500"># On your team page, copy the sync command:</span>
+            </div>
+            <div className="bg-gray-900/80 rounded-lg p-3 font-mono text-sm flex items-center justify-between gap-3">
+              <span>
+                <span className="text-gray-500">$ </span>
+                <span className="text-blue-400">mcp sync --team acme-corp</span>
+              </span>
+              <CopyButton text="mcp sync --team acme-corp" />
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-3">
+            API keys are never stored in the cloud — the CLI asks for them locally during sync.
+          </p>
+          <a href="/teams" className="inline-block mt-3 text-sm text-blue-400 hover:underline">
+            Create a team →
+          </a>
         </div>
       </section>
 

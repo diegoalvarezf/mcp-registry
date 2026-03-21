@@ -61,6 +61,10 @@ export default async function HomePage({
               Learn more →
             </a>
           </div>
+          <div className="mt-3 flex items-center justify-center gap-2 text-sm text-gray-500">
+            <span>Have a team?</span>
+            <a href="/teams" className="text-blue-400 hover:underline">Sync your MCP stack →</a>
+          </div>
         </div>
       )}
 
