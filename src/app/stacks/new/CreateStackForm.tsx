@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const ICONS = ["⚡", "🔍", "📊", "🚀", "📋", "🔒", "🛠️", "🎯", "🧪", "💡", "🌐", "📦"];
+const ICONS = ["⬡", "◈", "◎", "◆", "▲", "⊕", "⌬", "⬢", "✦", "⟡", "⊞", "⌘"];
 
 type ItemType = "server" | "skill" | "agent";
 
@@ -21,7 +21,7 @@ export function CreateStackForm() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [icon, setIcon] = useState("📦");
+  const [icon, setIcon] = useState("⬡");
   const [isPublic, setIsPublic] = useState(false);
   const [items, setItems] = useState<StackItem[]>([]);
   const [addType, setAddType] = useState<ItemType>("server");
