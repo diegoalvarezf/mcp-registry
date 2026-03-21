@@ -2,11 +2,13 @@
 import type { McpServer } from "@/lib/types";
 
 function getGithubAvatar(repoUrl: string, authorUrl?: string | null): string | null {
-  // Intenta sacar el usuario/org de la URL del autor o del repo
-  const url = authorUrl ?? repoUrl;
-  const match = url.match(/github\.com\/([^\/]+)/);
-  if (!match) return null;
-  return `https://github.com/${match[1]}.png?size=40`;
+  // Intenta primero authorUrl (si es GitHub), luego repoUrl
+  for (const url of [authorUrl, repoUrl]) {
+    if (!url) continue;
+    const match = url.match(/github\.com\/([^\/]+)/);
+    if (match) return `https://github.com/${match[1]}.png?size=40`;
+  }
+  return null;
 }
 
 export function ServerCard({ server, featured }: { server: McpServer; featured?: boolean }) {
