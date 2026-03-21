@@ -10,23 +10,24 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const skill = await getSkill(params.slug);
   if (!skill) return {};
   return {
-    title: `${skill.name} — MCPHub Skills`,
+    title: `${skill.name} Agent — MCPHub`,
     description: skill.description,
   };
 }
 
-export default async function SkillPage({ params }: { params: { slug: string } }) {
+export default async function AgentPage({ params }: { params: { slug: string } }) {
   const skill = await getSkill(params.slug);
-  if (!skill || skill.type !== "prompt") notFound();
+  if (!skill || skill.type !== "agent") notFound();
 
   const session = await auth();
   const tags = parseTags(skill);
   const installCmd = `mcp install-skill ${skill.slug}`;
+  const runCmd = `claude --agent ${skill.slug} "your task here"`;
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
-      <a href="/skills" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors mb-8">
-        ← All skills
+      <a href="/agents" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors mb-8">
+        ← All agents
       </a>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -35,58 +36,72 @@ export default async function SkillPage({ params }: { params: { slug: string } }
           {/* Header */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs px-2.5 py-1 rounded-full border bg-purple-500/10 border-purple-500/20 text-purple-400 font-medium">
-                Prompt · Slash command
+              <span className="text-xs px-2.5 py-1 rounded-full border bg-orange-500/10 border-orange-500/20 text-orange-400 font-medium">
+                Agent
               </span>
               {skill.verified && (
-                <span className="text-xs text-purple-400 border border-purple-500/20 bg-purple-500/10 px-2.5 py-1 rounded-full">✓ Verified</span>
+                <span className="text-xs text-orange-400 border border-orange-500/20 bg-orange-500/10 px-2.5 py-1 rounded-full">✓ Verified</span>
               )}
             </div>
             <h1 className="text-3xl font-bold mb-2">{skill.name}</h1>
             <p className="text-gray-400 text-lg">{skill.description}</p>
           </div>
 
-          {/* What happens when you install it */}
+          {/* What is an agent / what happens when you install */}
           <section className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-800">
               <h2 className="font-semibold text-white">What happens when you install it</h2>
             </div>
             <div className="p-5 space-y-4">
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold shrink-0">1</div>
+                <div className="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold shrink-0">1</div>
                 <div>
-                  <p className="text-sm text-white font-medium mb-1">You run the install command</p>
+                  <p className="text-sm text-white font-medium mb-1">Install the agent</p>
                   <code className="text-xs bg-gray-800 px-2 py-1 rounded text-green-400">{installCmd}</code>
-                  <p className="text-xs text-gray-500 mt-1">MCPHub CLI downloads this prompt from the registry.</p>
+                  <p className="text-xs text-gray-500 mt-1">Downloads the system prompt and saves it locally.</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold shrink-0">2</div>
+                <div className="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold shrink-0">2</div>
                 <div>
-                  <p className="text-sm text-white font-medium mb-1">Saved as a file in Claude Code</p>
-                  <code className="text-xs bg-gray-800 px-2 py-1 rounded font-mono text-gray-300">~/.claude/commands/{skill.slug}.md</code>
-                  <p className="text-xs text-gray-500 mt-1">Claude Code reads all <code className="bg-gray-800 px-1 rounded">.md</code> files in this folder as slash commands.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold shrink-0">3</div>
-                <div>
-                  <p className="text-sm text-white font-medium mb-1">Use it in any conversation</p>
-                  <div className="flex items-center gap-2">
-                    <code className="text-sm bg-gray-800 px-2 py-1 rounded text-purple-400 font-mono">/{skill.slug}</code>
-                    <span className="text-xs text-gray-500">in Claude Code (after restart)</span>
-                  </div>
+                  <p className="text-sm text-white font-medium mb-1">Saved as an agent definition</p>
+                  <code className="text-xs bg-gray-800 px-2 py-1 rounded font-mono text-gray-300">~/.claude/agents/{skill.slug}.md</code>
                   <p className="text-xs text-gray-500 mt-1">
-                    Claude runs the prompt against your current file or selection — no copy-paste needed.
+                    This file contains the system prompt that defines how this agent thinks and behaves.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold shrink-0">3</div>
+                <div>
+                  <p className="text-sm text-white font-medium mb-2">Run it for any task</p>
+                  <code className="text-xs bg-gray-800 px-2 py-1.5 rounded text-orange-400 font-mono block">{runCmd}</code>
+                  <p className="text-xs text-gray-500 mt-2">
+                    The agent maintains its persona and principles throughout the entire session — every response comes from the perspective of {skill.name}.
                   </p>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Prompt content */}
+          {/* Agent vs Skill clarifier */}
+          <section className="bg-orange-500/5 border border-orange-500/20 rounded-xl p-4">
+            <p className="text-sm font-medium text-white mb-2">Agent vs Skill — what's the difference?</p>
+            <div className="grid grid-cols-2 gap-3 text-xs text-gray-400">
+              <div>
+                <p className="text-purple-400 font-medium mb-1">Skill (prompt)</p>
+                <p>One-off task. You call it, it runs, done. Great for repetitive actions like reviewing a PR or writing tests.</p>
+              </div>
+              <div>
+                <p className="text-orange-400 font-medium mb-1">Agent</p>
+                <p>Persistent persona. Every message is answered through this agent's expertise and principles. Great for extended sessions.</p>
+              </div>
+            </div>
+          </section>
+
+          {/* System prompt */}
           <section>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Prompt content</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">System prompt</h2>
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 relative">
               <div className="absolute top-3 right-3">
                 <CopyButton text={skill.content} />
@@ -108,8 +123,8 @@ export default async function SkillPage({ params }: { params: { slug: string } }
               <CopyButton text={installCmd} />
             </div>
             <div className="text-xs text-gray-500 space-y-1">
-              <p>After install, restart Claude Code and type:</p>
-              <code className="block bg-gray-800 px-2 py-1.5 rounded text-purple-400 font-mono text-sm">/{skill.slug}</code>
+              <p>Then run with:</p>
+              <code className="block bg-gray-800 px-2 py-1.5 rounded text-orange-400 font-mono text-xs break-all">{runCmd}</code>
             </div>
             <p className="text-xs text-gray-600">
               Requires <a href="/install-cli" className="text-blue-400/70 hover:text-blue-400">MCPHub CLI</a>
@@ -149,7 +164,7 @@ export default async function SkillPage({ params }: { params: { slug: string } }
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Tags</h3>
               <div className="flex flex-wrap gap-1.5">
                 {tags.map((t) => (
-                  <a key={t} href={`/skills?tag=${t}`}
+                  <a key={t} href={`/agents?tag=${t}`}
                     className="text-xs px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 border border-gray-700 hover:border-gray-500 transition-colors">
                     #{t}
                   </a>
@@ -158,21 +173,18 @@ export default async function SkillPage({ params }: { params: { slug: string } }
             </div>
           )}
 
-          {/* Also see agents */}
-          <a href="/agents"
-            className="block bg-orange-500/5 border border-orange-500/20 rounded-xl p-4 hover:bg-orange-500/10 transition-colors">
-            <p className="text-sm font-medium text-white mb-1">Looking for Agents?</p>
-            <p className="text-xs text-gray-500">
-              Agents run with a full system prompt and persistent behavior — not just a one-off command.
-            </p>
-            <p className="text-xs text-orange-400 mt-2">Browse agents →</p>
+          <a href="/skills"
+            className="block bg-purple-500/5 border border-purple-500/20 rounded-xl p-4 hover:bg-purple-500/10 transition-colors">
+            <p className="text-sm font-medium text-white mb-1">Looking for Slash commands?</p>
+            <p className="text-xs text-gray-500">Skills are one-off prompts you invoke with <code className="bg-gray-800 px-1 rounded">/command</code>.</p>
+            <p className="text-xs text-purple-400 mt-2">Browse skills →</p>
           </a>
 
           {session?.user && (
             <a href="/teams"
               className="block bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 hover:bg-blue-500/10 transition-colors">
               <p className="text-sm font-medium text-white mb-1">Share with your team</p>
-              <p className="text-xs text-gray-500">Add this skill to your team so everyone gets it on <code className="bg-gray-800 px-1 rounded">mcp sync</code>.</p>
+              <p className="text-xs text-gray-500">Add this agent to your team so everyone gets it on <code className="bg-gray-800 px-1 rounded">mcp sync</code>.</p>
             </a>
           )}
         </div>

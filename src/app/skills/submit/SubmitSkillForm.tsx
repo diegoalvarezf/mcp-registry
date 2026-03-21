@@ -2,9 +2,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export function SubmitSkillForm() {
+export function SubmitSkillForm({ defaultType = "prompt" }: { defaultType?: "prompt" | "agent" }) {
   const router = useRouter();
-  const [type, setType] = useState<"prompt" | "agent">("prompt");
+  const [type, setType] = useState<"prompt" | "agent">(defaultType);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
@@ -37,7 +37,7 @@ export function SubmitSkillForm() {
       setError(d.error ?? "Error submitting skill");
     } else {
       const data = await res.json();
-      router.push(`/skills/${data.slug}`);
+      router.push(data.type === "agent" ? `/agents/${data.slug}` : `/skills/${data.slug}`);
     }
   }
 
