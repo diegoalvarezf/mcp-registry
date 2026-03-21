@@ -78,7 +78,7 @@ export default async function StacksPage() {
                       <span className="text-xs text-purple-400/70">{stack.skills.length} {t.skills_label}</span>
                     )}
                     {stack.agents.length > 0 && (
-                      <span className="text-xs text-orange-400/70">{stack.agents.length} {t.agents_label}</span>
+                      <span className="text-xs text-orange-400/70">{stack.agents.length} {stack.agents.length === 1 ? "agent" : t.agents_label}</span>
                     )}
                   </div>
                 </div>

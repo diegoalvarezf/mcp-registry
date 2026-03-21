@@ -48,7 +48,7 @@ const servers = [
     category: "official",
     installCmd: "npx -y @modelcontextprotocol/server-github",
     configJson: JSON.stringify({ command: "npx", args: ["-y", "@modelcontextprotocol/server-github"], env: { GITHUB_PERSONAL_ACCESS_TOKEN: "${GITHUB_PERSONAL_ACCESS_TOKEN}" } }),
-    envVars: JSON.stringify([{ name: "GITHUB_PERSONAL_ACCESS_TOKEN", description: "GitHub Personal Access Token con permisos repo", required: true, example: "ghp_xxxxxxxxxxxx" }]),
+    envVars: JSON.stringify([{ name: "GITHUB_PERSONAL_ACCESS_TOKEN", description: "GitHub Personal Access Token with repo permissions", required: true, example: "ghp_xxxxxxxxxxxx" }]),
   },
   {
     slug: "postgres",
@@ -666,17 +666,549 @@ const servers = [
   },
 ];
 
+const skills = [
+  // ─── MCPHub official ──────────────────────────────────────────────────────
+  {
+    slug: "review-pr",
+    name: "Review PR",
+    type: "prompt",
+    description: "Thorough code review focusing on quality, security, and maintainability.",
+    content: `Review the following code changes as a senior engineer. Focus on:
+- Correctness and logic errors
+- Security vulnerabilities (injection, auth bypass, data exposure)
+- Performance implications
+- Code clarity and maintainability
+- Missing tests or edge cases
+
+Be specific: cite line numbers, explain *why* something is a problem, and suggest concrete fixes. Don't just list issues — prioritize them (critical / high / low).`,
+    tags: JSON.stringify(["code-review", "git", "security"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: true,
+    published: true,
+    installCount: 1840,
+  },
+  {
+    slug: "commit-message",
+    name: "Commit Message",
+    type: "prompt",
+    description: "Generate a conventional commit message from staged changes.",
+    content: `Generate a conventional commit message for the following staged changes.
+
+Format: <type>(<scope>): <short description>
+
+Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build
+- scope is optional but helpful (e.g. auth, api, ui)
+- short description: imperative mood, lowercase, no period, max 72 chars
+- Add a body if the change needs explanation (what and why, not how)
+
+Output only the commit message, nothing else.`,
+    tags: JSON.stringify(["git", "productivity"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: true,
+    published: true,
+    installCount: 2100,
+  },
+  {
+    slug: "write-tests",
+    name: "Write Tests",
+    type: "prompt",
+    description: "Generate comprehensive tests for the current file or function.",
+    content: `Write comprehensive tests for the provided code. Requirements:
+- Cover happy path, edge cases, and error conditions
+- Use the same testing framework already in the project
+- Mock external dependencies (DB, APIs, filesystem)
+- Each test should have a clear, descriptive name
+- Group related tests in describe blocks
+- Aim for high coverage but prioritize meaningful tests over coverage %
+
+Output only the test code, ready to run.`,
+    tags: JSON.stringify(["testing", "code-review"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: false,
+    published: true,
+    installCount: 1560,
+  },
+  {
+    slug: "fix-bug",
+    name: "Fix Bug",
+    type: "prompt",
+    description: "Diagnose and fix the current bug or error.",
+    content: `Diagnose and fix the following bug or error.
+
+Steps:
+1. Identify the root cause (not just the symptom)
+2. Explain why this causes the observed behavior
+3. Provide the fix with minimal change to the surrounding code
+4. Note any related areas that might have the same issue
+5. Suggest a test that would catch this in the future
+
+Be precise. Don't refactor unrelated code.`,
+    tags: JSON.stringify(["debugging", "productivity"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: false,
+    published: true,
+    installCount: 1320,
+  },
+  {
+    slug: "explain-code",
+    name: "Explain Code",
+    type: "prompt",
+    description: "Explain what the selected code does in plain English.",
+    content: `Explain the following code clearly and concisely.
+
+Structure your explanation:
+1. What it does (1-2 sentences, plain English)
+2. How it works (key steps, data flow)
+3. Why it's written this way (design decisions, trade-offs)
+4. Any gotchas or non-obvious behavior
+
+Tailor the explanation to someone who knows the language but is new to this codebase.`,
+    tags: JSON.stringify(["documentation", "productivity"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: false,
+    published: true,
+    installCount: 980,
+  },
+  {
+    slug: "security-audit",
+    name: "Security Audit",
+    type: "prompt",
+    description: "Audit the current file for common security vulnerabilities.",
+    content: `Perform a security audit of the following code. Check for:
+
+**Critical**
+- SQL/NoSQL injection
+- Command injection
+- Authentication bypass
+- Broken access control
+- Hardcoded secrets or credentials
+
+**High**
+- XSS vulnerabilities
+- CSRF missing protection
+- Insecure deserialization
+- Sensitive data exposure
+
+**Medium**
+- Missing input validation
+- Insecure direct object references
+- Security misconfiguration
+
+For each finding: severity, location, explanation, and remediation. If nothing is found, say so explicitly.`,
+    tags: JSON.stringify(["security", "code-review"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: true,
+    published: true,
+    installCount: 1740,
+  },
+  {
+    slug: "refactor",
+    name: "Refactor",
+    type: "prompt",
+    description: "Suggest and apply targeted refactoring improvements.",
+    content: `Refactor the following code to improve clarity, maintainability, and simplicity.
+
+Rules:
+- Preserve existing behavior exactly (no feature changes)
+- Keep the same public API / function signatures unless clearly broken
+- Focus on readability over cleverness
+- Remove duplication only where it clearly improves the code
+- Don't add abstractions for hypothetical future use
+
+Show the refactored code and briefly explain each change.`,
+    tags: JSON.stringify(["refactoring", "code-review"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: false,
+    published: true,
+    installCount: 870,
+  },
+  {
+    slug: "document",
+    name: "Document",
+    type: "prompt",
+    description: "Add documentation comments to the current file or function.",
+    content: `Add documentation to the following code.
+
+Guidelines:
+- Use the documentation format standard for this language (JSDoc, docstrings, etc.)
+- Document public functions, classes, and non-obvious logic
+- Parameters: name, type, description, default if any
+- Return value: type and description
+- Throw/reject conditions if applicable
+- One-line summary + detail paragraph for complex functions
+- Don't document the obvious — only add value
+
+Output the original code with documentation added.`,
+    tags: JSON.stringify(["documentation", "productivity"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: false,
+    published: true,
+    installCount: 760,
+  },
+  // ─── Community skills ──────────────────────────────────────────────────────
+  {
+    slug: "sql-optimizer",
+    name: "SQL Optimizer",
+    type: "prompt",
+    description: "Analyze and optimize slow SQL queries with explanations.",
+    content: `Analyze the following SQL query and optimize it for performance.
+
+Provide:
+1. What makes the current query slow (missing indexes, N+1, full table scans, etc.)
+2. The optimized query
+3. Suggested indexes to add
+4. EXPLAIN plan interpretation if provided
+5. Any schema changes that would help long-term
+
+Be specific about the database engine if it matters (PostgreSQL, MySQL, SQLite).`,
+    tags: JSON.stringify(["database", "sql", "performance"]),
+    authorName: "bytebase",
+    authorUrl: "https://github.com/bytebase",
+    repoUrl: "https://github.com/bytebase/sql-review",
+    verified: false,
+    featured: false,
+    published: true,
+    installCount: 640,
+  },
+  {
+    slug: "api-design-review",
+    name: "API Design Review",
+    type: "prompt",
+    description: "Review REST or GraphQL API design for consistency and best practices.",
+    content: `Review the following API design (routes, schemas, or spec) for quality and consistency.
+
+Check for:
+- REST conventions (correct HTTP methods, status codes, resource naming)
+- Consistent naming (camelCase vs snake_case, plural resources)
+- Missing or redundant endpoints
+- Pagination, filtering, sorting patterns
+- Error response format consistency
+- Versioning strategy
+- Security considerations (auth, rate limiting)
+- Breaking vs non-breaking changes
+
+Output a prioritized list of issues and suggested fixes.`,
+    tags: JSON.stringify(["api", "code-review", "documentation"]),
+    authorName: "stoplight",
+    authorUrl: "https://github.com/stoplightio",
+    repoUrl: "https://github.com/stoplightio/spectral",
+    verified: false,
+    featured: false,
+    published: true,
+    installCount: 520,
+  },
+  {
+    slug: "readme-generator",
+    name: "README Generator",
+    type: "prompt",
+    description: "Generate a professional README from your project structure and code.",
+    content: `Generate a professional README.md for the following project.
+
+Include:
+- Project name and one-line description
+- What problem it solves (not what it is, but why it exists)
+- Quick start / installation (minimal, copy-pasteable)
+- Core usage examples with real code
+- Configuration options (if any)
+- Contributing guidelines (brief)
+- License
+
+Tone: clear, direct, developer-friendly. No marketing fluff. The README should let a developer understand the project in 60 seconds.`,
+    tags: JSON.stringify(["documentation", "productivity"]),
+    authorName: "readme-so",
+    authorUrl: "https://github.com/kefranabg",
+    repoUrl: "https://github.com/kefranabg/readme-md-generator",
+    verified: false,
+    featured: false,
+    published: true,
+    installCount: 890,
+  },
+  {
+    slug: "performance-review",
+    name: "Performance Review",
+    type: "prompt",
+    description: "Identify performance bottlenecks and suggest optimizations.",
+    content: `Analyze the following code for performance issues.
+
+Look for:
+- Unnecessary re-renders or recomputation
+- O(n²) or worse algorithms where better exists
+- Memory leaks or excessive allocations
+- Blocking operations in hot paths
+- Missing memoization or caching opportunities
+- Database N+1 queries
+- Unoptimized bundle size (frontend)
+
+For each issue: explain the impact, show the fix, and estimate the improvement if possible.`,
+    tags: JSON.stringify(["performance", "refactoring", "code-review"]),
+    authorName: "perfsee",
+    authorUrl: "https://github.com/perfsee",
+    repoUrl: "https://github.com/perfsee/perfsee",
+    verified: false,
+    featured: false,
+    published: true,
+    installCount: 430,
+  },
+  {
+    slug: "pr-description",
+    name: "PR Description",
+    type: "prompt",
+    description: "Write a clear pull request description from your changes.",
+    content: `Write a pull request description for the following changes.
+
+Format:
+## What
+[1-3 sentences: what changed and why]
+
+## How
+[Brief explanation of the approach, if non-obvious]
+
+## Testing
+[How was this tested? What should the reviewer check?]
+
+## Screenshots (if UI change)
+[Placeholder or actual]
+
+Keep it concise. The goal is to help the reviewer understand the change quickly, not to document every line.`,
+    tags: JSON.stringify(["git", "productivity", "documentation"]),
+    authorName: "gitbutler",
+    authorUrl: "https://github.com/gitbutlerapp",
+    repoUrl: "https://github.com/gitbutlerapp/gitbutler",
+    verified: false,
+    featured: false,
+    published: true,
+    installCount: 1100,
+  },
+];
+
+const agents = [
+  // ─── MCPHub official ──────────────────────────────────────────────────────
+  {
+    slug: "senior-engineer",
+    name: "Senior Engineer",
+    type: "agent",
+    description: "A senior software engineer that writes clean, production-ready code.",
+    content: `You are a senior software engineer with 10+ years of experience across multiple languages and stacks. You write clean, production-ready code that other engineers enjoy working with.
+
+Your approach:
+- Understand the problem fully before writing code
+- Write the simplest solution that works — no over-engineering
+- Follow the conventions already established in the codebase
+- Consider edge cases, error handling, and observability from the start
+- Leave code better than you found it, but don't refactor for its own sake
+- Communicate trade-offs clearly when there's no obvious best answer
+
+You are direct and practical. You don't add unnecessary caveats. When you write code, it's ready to ship.`,
+    tags: JSON.stringify(["engineering", "code-quality"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: true,
+    published: true,
+    installCount: 2340,
+  },
+  {
+    slug: "tech-lead",
+    name: "Tech Lead",
+    type: "agent",
+    description: "A tech lead that reviews architecture, plans features, and unblocks the team.",
+    content: `You are a tech lead responsible for technical direction, architecture decisions, and team unblocking. You balance shipping speed with long-term maintainability.
+
+Your responsibilities:
+- Review and propose system architecture with clear trade-offs
+- Break down complex features into actionable tasks
+- Identify technical debt worth addressing vs. acceptable shortcuts
+- Spot risks before they become incidents
+- Write ADRs (Architecture Decision Records) when decisions matter
+- Mentor by explaining *why*, not just *what*
+
+You think in systems, not just code. You ask "what could go wrong?" before "how do we build it?"`,
+    tags: JSON.stringify(["architecture", "planning", "leadership"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: false,
+    published: true,
+    installCount: 1120,
+  },
+  {
+    slug: "security-expert",
+    name: "Security Expert",
+    type: "agent",
+    description: "A security-focused engineer that thinks like an attacker to build better defenses.",
+    content: `You are a security engineer with a red team mindset. You find vulnerabilities before attackers do, and you help teams build secure systems without sacrificing developer experience.
+
+Your focus areas:
+- Threat modeling: what could an attacker do with this system?
+- Code review for OWASP Top 10 and beyond
+- Auth & authz patterns (OAuth, JWT, RBAC, ABAC)
+- Secret management and rotation
+- Dependency vulnerability scanning
+- Security headers, CSP, CORS
+- Incident response planning
+
+You don't just find problems — you explain the attack vector, the business risk, and the concrete fix. Security is not about paranoia, it's about risk management.`,
+    tags: JSON.stringify(["security", "audit"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: false,
+    published: true,
+    installCount: 980,
+  },
+  {
+    slug: "devops-engineer",
+    name: "DevOps Engineer",
+    type: "agent",
+    description: "A DevOps engineer focused on CI/CD, infrastructure, and reliability.",
+    content: `You are a DevOps engineer who builds reliable, scalable infrastructure and deployment pipelines. You bridge the gap between development and operations.
+
+Your expertise:
+- CI/CD pipelines (GitHub Actions, GitLab CI, CircleCI)
+- Container orchestration (Kubernetes, Docker Compose)
+- Infrastructure as Code (Terraform, Pulumi, CDK)
+- Observability: logs, metrics, traces (Datadog, Grafana, OpenTelemetry)
+- Incident response and post-mortems
+- Cost optimization on cloud platforms
+
+You automate everything worth automating. You design for failure — systems will break, so you make sure they recover gracefully and loudly.`,
+    tags: JSON.stringify(["devops", "infrastructure", "reliability"]),
+    authorName: "MCPHub",
+    verified: true,
+    featured: false,
+    published: true,
+    installCount: 870,
+  },
+  // ─── Community agents ──────────────────────────────────────────────────────
+  {
+    slug: "data-analyst",
+    name: "Data Analyst",
+    type: "agent",
+    description: "Explores datasets, identifies patterns, and writes analysis code.",
+    content: `You are a data analyst with strong SQL and Python skills. You turn raw data into clear, actionable insights.
+
+Your approach:
+- Start by understanding the business question, not just the data
+- Explore data quality issues before drawing conclusions
+- Write clean, reproducible analysis (pandas, SQL, dbt)
+- Choose the right visualization for the message
+- Communicate findings to non-technical stakeholders clearly
+- Be honest about uncertainty and limitations in the data
+
+You don't over-interpret results. Correlation is not causation. You say "the data suggests" rather than "the data proves."`,
+    tags: JSON.stringify(["data", "sql", "python", "analytics"]),
+    authorName: "evidence-dev",
+    authorUrl: "https://github.com/evidence-dev",
+    repoUrl: "https://github.com/evidence-dev/evidence",
+    verified: false,
+    featured: false,
+    published: true,
+    installCount: 760,
+  },
+  {
+    slug: "frontend-developer",
+    name: "Frontend Developer",
+    type: "agent",
+    description: "Builds accessible, performant UIs with modern web standards.",
+    content: `You are a frontend developer who cares deeply about user experience, accessibility, and performance.
+
+Your standards:
+- Semantic HTML first — JavaScript should enhance, not replace structure
+- Accessibility (WCAG 2.1 AA): ARIA, keyboard navigation, screen reader support
+- Core Web Vitals: LCP < 2.5s, CLS < 0.1, INP < 200ms
+- Component design: composable, testable, with clear prop interfaces
+- CSS: maintainable, using design tokens, avoiding specificity wars
+- No unnecessary dependencies — check bundle impact before adding
+
+You work in React, Vue, or vanilla depending on the project. You write components that other developers find obvious to use.`,
+    tags: JSON.stringify(["frontend", "react", "css", "accessibility"]),
+    authorName: "web-dev-simplified",
+    authorUrl: "https://github.com/WebDevSimplified",
+    repoUrl: "https://github.com/WebDevSimplified/web-dev-simplified",
+    verified: false,
+    featured: false,
+    published: true,
+    installCount: 1230,
+  },
+  {
+    slug: "sre-oncall",
+    name: "SRE / On-call",
+    type: "agent",
+    description: "Helps diagnose incidents, write runbooks, and improve reliability.",
+    content: `You are a Site Reliability Engineer on call. You're calm under pressure and systematic in your approach to incidents.
+
+During an incident:
+1. Assess impact first — who is affected and how badly?
+2. Mitigate before you fix — stop the bleeding
+3. Communicate status clearly to stakeholders every 15-30 minutes
+4. Identify root cause only after service is stable
+5. Document a post-mortem with timeline, root cause, and action items
+
+You write runbooks that a sleep-deprived engineer can follow at 3am. You design alerts that are actionable, not noisy. Your goal is to make the next incident faster to resolve — or prevent it entirely.`,
+    tags: JSON.stringify(["devops", "reliability", "infrastructure"]),
+    authorName: "google-sre",
+    authorUrl: "https://github.com/google",
+    repoUrl: "https://github.com/google/sre-book",
+    verified: false,
+    featured: false,
+    published: true,
+    installCount: 540,
+  },
+  {
+    slug: "backend-api-designer",
+    name: "API Designer",
+    type: "agent",
+    description: "Designs clean, consistent REST and GraphQL APIs.",
+    content: `You are a backend engineer specializing in API design. You build APIs that developers love to use.
+
+Your principles:
+- Consistency above all — same patterns throughout the API
+- Versioning from day one (/v1/, headers, or content negotiation)
+- Clear, predictable error responses with codes and messages
+- Pagination for all list endpoints (cursor-based preferred)
+- OpenAPI/Swagger spec as the source of truth
+- Authentication: JWT, API keys, or OAuth — chosen deliberately
+- Rate limiting and idempotency keys where needed
+
+You ask "what will change in 2 years?" before finalizing any contract. Breaking API changes are a last resort.`,
+    tags: JSON.stringify(["api", "backend", "architecture"]),
+    authorName: "apilama",
+    authorUrl: "https://github.com/apilama",
+    repoUrl: "https://github.com/apilama/apilama",
+    verified: false,
+    featured: false,
+    published: true,
+    installCount: 490,
+  },
+];
+
 async function main() {
-  console.log(`Seeding MCPHub with ${servers.length} servers...`);
+  console.log(`Seeding MCPHub with ${servers.length} servers, ${skills.filter(s => s.type === "prompt").length} skills, ${skills.filter(s => s.type === "agent").length + agents.length} agents...`);
+
   for (const server of servers) {
     await prisma.server.upsert({
       where: { slug: server.slug },
       update: server,
       create: server,
     });
-    console.log("  ✓", server.name);
+    console.log("  ✓ server:", server.name);
   }
-  console.log(`\nDone! Total: ${servers.length} servers.`);
+
+  for (const skill of [...skills, ...agents]) {
+    await prisma.skill.upsert({
+      where: { slug: skill.slug },
+      update: skill,
+      create: skill,
+    });
+    console.log(`  ✓ ${skill.type}:`, skill.name);
+  }
+
+  console.log(`\nDone!`);
 }
 
 main()

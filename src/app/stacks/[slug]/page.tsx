@@ -108,7 +108,7 @@ export default async function StackPage({ params }: { params: { slug: string } }
           )}
           {orderedAgents.length > 0 && (
             <span className="text-xs px-2.5 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400">
-              {orderedAgents.length} {t.agents_label}
+              {orderedAgents.length} {orderedAgents.length === 1 ? "agent" : t.agents_label}
             </span>
           )}
         </div>
