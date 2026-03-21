@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getSkill, parseTags } from "@/lib/skills-db";
 import { CopyButton } from "@/components/CopyButton";
+import { AvatarImg } from "@/components/AvatarImg";
 import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -139,11 +140,10 @@ export default async function AgentPage({ params }: { params: { slug: string } }
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Author</h3>
             <div className="flex items-center gap-2.5">
               {skill.authorUrl?.includes("github.com") && (
-                <img
+                <AvatarImg
                   src={`https://github.com/${skill.authorUrl.split("github.com/")[1]}.png?size=32`}
                   alt=""
                   className="w-7 h-7 rounded-full bg-gray-800"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 />
               )}
               <div>
