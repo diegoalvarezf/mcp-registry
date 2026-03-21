@@ -58,9 +58,9 @@ export default function InstallCliPage() {
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center justify-between gap-4">
             <div className="font-mono text-sm">
               <span className="text-gray-500">$ </span>
-              <span className="text-green-400">npm install -g @mcphub/cli</span>
+              <span className="text-green-400">npm install -g @sallyheller/mcphub</span>
             </div>
-            <CopyButton text="npm install -g @mcphub/cli" />
+            <CopyButton text="npm install -g @sallyheller/mcphub" />
           </div>
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-gray-800" />
@@ -70,9 +70,9 @@ export default function InstallCliPage() {
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center justify-between gap-4">
             <div className="font-mono text-sm">
               <span className="text-gray-500">$ </span>
-              <span className="text-blue-400">npx @mcphub/cli install github</span>
+              <span className="text-blue-400">npx @sallyheller/mcphub install github</span>
             </div>
-            <CopyButton text="npx @mcphub/cli install github" />
+            <CopyButton text="npx @sallyheller/mcphub install github" />
           </div>
           <p className="text-xs text-gray-600">
             Using <code className="bg-gray-900 px-1 rounded">npx</code> runs the latest version without a global install — useful for CI/CD or one-off installs.

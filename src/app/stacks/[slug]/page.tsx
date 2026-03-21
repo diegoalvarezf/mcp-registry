@@ -127,7 +127,7 @@ export default async function StackPage({ params }: { params: { slug: string } }
             </div>
             <p className="text-xs text-gray-600 mt-3">
               Requires <a href="/install-cli" className="text-blue-400/70 hover:text-blue-400">MCPHub CLI</a>
-              {" "}· <span className="font-mono">npm install -g @mcphub/cli</span>
+              {" "}· <span className="font-mono">npm install -g @sallyheller/mcphub</span>
             </p>
           </div>
         </section>

@@ -1,9 +1,9 @@
 {
-  "name": "@mcphub/cli",
+  "name": "@sallyheller/mcphub",
   "version": "0.1.0",
   "description": "Install and manage MCP servers across Claude Code, Cursor, and Continue",
   "bin": {
-    "mcp": "./dist/index.js"
+    "mcphub": "./dist/index.js"
   },
   "type": "module",
   "main": "./dist/index.js",

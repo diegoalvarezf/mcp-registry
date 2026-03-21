@@ -54,7 +54,7 @@ export function InstallPanel({ slug, installCmd, configJson, envVars }: Props) {
   const [activeClient, setActiveClient] = useState<Client>("claude-code");
   const [jsonCopied, setJsonCopied] = useState(false);
 
-  const npxCmd = `npx @mcphub/cli install ${slug}`;
+  const npxCmd = `npx @sallyheller/mcphub install ${slug}`;
   const jsonConfig = buildJsonConfig(activeClient, slug, configJson, installCmd);
 
   function copy(text: string, setCopiedFn: (v: boolean) => void) {

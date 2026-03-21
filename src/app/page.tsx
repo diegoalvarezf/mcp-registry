@@ -118,7 +118,7 @@ export default async function HomePage({
           </p>
           <div className="mt-6 flex items-center justify-center">
             <div className="bg-gray-900 border border-gray-800 rounded-lg px-5 py-2.5 font-mono text-sm text-gray-300">
-              <span className="text-gray-600 select-none">$ </span>npx @mcphub/cli install <span className="text-blue-400">github</span>
+              <span className="text-gray-600 select-none">$ </span>npx @sallyheller/mcphub install <span className="text-blue-400">github</span>
             </div>
           </div>
 
