@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { IconCheck, IconCopy, IconChevronDown } from "@/components/Icons";
+import { IconCheck, IconCopy, IconChevronDown, IconVSCode } from "@/components/Icons";
 import type { EnvVar } from "@/lib/types";
 
 type Client = "claude-code" | "claude-desktop" | "cursor" | "continue";
@@ -33,6 +33,16 @@ function buildEntry(configJson: string | null, installCmd: string | null): Entry
     : parseInstallCmd(installCmd ?? "npx -y @mcphub/server");
 }
 
+function buildVSCodeUri(slug: string, configJson: string | null, installCmd: string | null): string | null {
+  try {
+    const entry = buildEntry(configJson, installCmd);
+    const payload = JSON.stringify({ name: slug, ...entry });
+    return `vscode:mcp/install?${encodeURIComponent(payload)}`;
+  } catch {
+    return null;
+  }
+}
+
 function buildJsonConfig(client: Client, slug: string, configJson: string | null, installCmd: string | null): string {
   const entry = buildEntry(configJson, installCmd);
   if (client === "continue") {
@@ -49,12 +59,13 @@ interface Props {
 }
 
 export function InstallPanel({ slug, installCmd, configJson, envVars }: Props) {
-  const [copied, setCopied] = useState(false);
+  const [cliCopied, setCliCopied] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
   const [activeClient, setActiveClient] = useState<Client>("claude-code");
   const [jsonCopied, setJsonCopied] = useState(false);
 
   const npxCmd = `npx @sallyheller/mcphub install ${slug}`;
+  const vscodeUri = buildVSCodeUri(slug, configJson, installCmd);
   const jsonConfig = buildJsonConfig(activeClient, slug, configJson, installCmd);
 
   function copy(text: string, setCopiedFn: (v: boolean) => void) {
@@ -66,23 +77,35 @@ export function InstallPanel({ slug, installCmd, configJson, envVars }: Props) {
 
   return (
     <div className="space-y-3">
-      {/* Primary: npx command */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center justify-between gap-4">
-        <div className="font-mono text-sm min-w-0">
-          <span className="text-gray-600 select-none">$ </span>
-          <span className="text-white">{npxCmd}</span>
-        </div>
+      {/* One-click installs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {/* VS Code */}
+        {vscodeUri && (
+          <a
+            href={vscodeUri}
+            className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm transition-colors"
+          >
+            <IconVSCode size={15} />
+            Install in VS Code
+          </a>
+        )}
+
+        {/* Claude Desktop — copy JSON config */}
         <button
           type="button"
-          onClick={() => copy(npxCmd, setCopied)}
-          className="shrink-0 flex items-center gap-1.5 text-xs bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors"
+          onClick={() => copy(buildJsonConfig("claude-desktop", slug, configJson, installCmd), setJsonCopied)}
+          className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-orange-600/80 hover:bg-orange-500/80 text-white font-medium text-sm transition-colors"
         >
-          {copied ? <IconCheck size={12} /> : <IconCopy size={12} />}
-          {copied ? "Copied" : "Copy"}
+          {jsonCopied ? <IconCheck size={15} /> : (
+            <svg width={15} height={15} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+            </svg>
+          )}
+          {jsonCopied ? "Copied!" : "Copy for Claude Desktop"}
         </button>
       </div>
 
-      {/* Env vars hint — informational only */}
+      {/* Env vars hint */}
       {envVars && envVars.length > 0 && (
         <p className="text-xs text-gray-600 px-1">
           Requires:{" "}
@@ -96,7 +119,23 @@ export function InstallPanel({ slug, installCmd, configJson, envVars }: Props) {
         </p>
       )}
 
-      {/* Secondary: manual / JSON config */}
+      {/* CLI command */}
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center justify-between gap-4">
+        <div className="font-mono text-sm min-w-0">
+          <span className="text-gray-600 select-none">$ </span>
+          <span className="text-white">{npxCmd}</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => copy(npxCmd, setCliCopied)}
+          className="shrink-0 flex items-center gap-1.5 text-xs bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors"
+        >
+          {cliCopied ? <IconCheck size={12} /> : <IconCopy size={12} />}
+          {cliCopied ? "Copied" : "Copy"}
+        </button>
+      </div>
+
+      {/* Manual JSON config */}
       <div className="border border-gray-800 rounded-xl overflow-hidden">
         <button
           type="button"
