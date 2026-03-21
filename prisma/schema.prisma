@@ -47,12 +47,47 @@ model Review {
 }
 
 model User {
-  id          String   @id @default(cuid())
-  githubId    String   @unique
-  githubLogin String   @unique
+  id          String       @id @default(cuid())
+  githubId    String       @unique
+  githubLogin String       @unique
   name        String
   email       String?
   avatarUrl   String?
-  role        String   @default("user") // "user" | "admin"
-  createdAt   DateTime @default(now())
+  role        String       @default("user") // "user" | "admin"
+  createdAt   DateTime     @default(now())
+  teamMembers TeamMember[]
+}
+
+model Team {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  name        String
+  description String?
+  inviteToken String       @unique @default(cuid())
+  createdAt   DateTime     @default(now())
+  members     TeamMember[]
+  servers     TeamServer[]
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   @default("member") // "owner" | "member"
+  createdAt DateTime @default(now())
+
+  @@unique([teamId, userId])
+}
+
+model TeamServer {
+  id         String   @id @default(cuid())
+  teamId     String
+  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  serverSlug String
+  notes      String?
+  addedAt    DateTime @default(now())
+
+  @@unique([teamId, serverSlug])
 }

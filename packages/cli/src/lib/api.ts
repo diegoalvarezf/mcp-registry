@@ -22,10 +22,10 @@ export interface McpServer {
 const REGISTRY_URL = process.env.MCPHUB_REGISTRY ?? "https://mcp-registry-sigma.vercel.app";
 
 export async function fetchServer(slug: string): Promise<McpServer | null> {
-  const res = await fetch(`${REGISTRY_URL}/api/servers?q=${encodeURIComponent(slug)}&limit=10`);
+  const res = await fetch(`${REGISTRY_URL}/api/servers/${encodeURIComponent(slug)}`);
   if (!res.ok) return null;
-  const data = await res.json() as { servers: McpServer[] };
-  return data.servers.find((s) => s.slug === slug) ?? data.servers[0] ?? null;
+  const data = await res.json() as { server: McpServer };
+  return data.server ?? null;
 }
 
 export async function searchServers(query: string, limit = 10): Promise<McpServer[]> {

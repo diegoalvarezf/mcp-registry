@@ -84,3 +84,15 @@ export function isAlreadyInstalled(clientId: ClientId, slug: string): boolean {
   }
   return !!(config.mcpServers?.[slug]);
 }
+
+export function removeFromClient(clientId: ClientId, slug: string): void {
+  const configPath = getDefaultConfigPath(clientId);
+  if (!fs.existsSync(configPath)) return;
+  const config = readJson(configPath);
+  if (clientId === "continue") {
+    config.mcpServers = (config.mcpServers ?? []).filter((s: any) => s.name !== slug);
+  } else {
+    if (config.mcpServers) delete config.mcpServers[slug];
+  }
+  writeJson(configPath, config);
+}
