@@ -6,14 +6,14 @@ const EXAMPLES = ["github", "postgres", "filesystem", "slack", "brave-search", "
 
 export function CliCommand() {
   const [index, setIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const [animating, setAnimating] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setVisible(false);
+      setAnimating(true);
       setTimeout(() => {
         setIndex(i => (i + 1) % EXAMPLES.length);
-        setVisible(true);
+        setAnimating(false);
       }, 300);
     }, 2000);
     return () => clearInterval(interval);
@@ -23,11 +23,16 @@ export function CliCommand() {
     <div className="bg-gray-900 border border-gray-800 rounded-lg px-5 py-2.5 font-mono text-sm text-gray-300">
       <span className="text-gray-600 select-none">$ </span>
       npx @sallyheller/mcphub install{" "}
-      <span
-        className="text-blue-400 transition-opacity duration-300"
-        style={{ opacity: visible ? 1 : 0 }}
-      >
-        {EXAMPLES[index]}
+      <span className="inline-block overflow-hidden align-bottom" style={{ height: "1.25em" }}>
+        <span
+          className="inline-block text-blue-400 transition-transform transition-opacity duration-300"
+          style={{
+            transform: animating ? "translateY(-100%)" : "translateY(0%)",
+            opacity: animating ? 0 : 1,
+          }}
+        >
+          {EXAMPLES[index]}
+        </span>
       </span>
     </div>
   );
