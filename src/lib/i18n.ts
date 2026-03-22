@@ -18,8 +18,8 @@ export const translations = {
     language: "Language",
 
     // Home hero
-    heroTitle: "Your AI Development Hub",
-    heroDesc: "Discover and install MCP servers, slash-command skills, and AI agents. Everything your Claude Code or Cursor needs — in one place.",
+    heroTitle: "The hub for MCP servers, skills, and agents",
+    heroDesc: "Discover and install tools for Claude Code, Cursor, Continue, and more. Built by the community, for the community.",
     heroOr: "or",
     allCommands: "All commands →",
 
@@ -91,13 +91,13 @@ export const translations = {
     installStackDesc1: "Installs all",
     installStackDesc2: "items — servers, skills, and agents — in one command.",
     noItemsStack: "No items found yet for this stack.",
-    shareStackTitle: "Share this stack with your team",
-    shareStackDesc: "Create a team, add these items, and share one sync command.",
+    shareStackTitle: "Share this stack",
+    shareStackDesc: "Copy the install command and share it — anyone can set up the same environment in seconds.",
     createTeam: "Create team →",
 
     // Submit
     submitTitle: "Submit to MCPHub",
-    submitDesc: "Share an MCP server, a slash-command skill, or an AI agent with the community — or save it privately to your library.",
+    submitDesc: "Share an MCP server, a skill, or an AI agent with the community — or save it privately to your library.",
 
     // Library
     libraryTitle: "My Library",
@@ -199,8 +199,8 @@ export const translations = {
     language: "Idioma",
 
     // Home hero
-    heroTitle: "Tu Hub de Desarrollo IA",
-    heroDesc: "Descubre e instala servidores MCP, skills y agentes de IA. Todo lo que Claude Code o Cursor necesitan — en un solo lugar.",
+    heroTitle: "El hub de servidores MCP, skills y agentes",
+    heroDesc: "Descubre e instala herramientas para Claude Code, Cursor, Continue y más. Construido por la comunidad, para la comunidad.",
     heroOr: "o",
     allCommands: "Todos los comandos →",
 
@@ -272,8 +272,8 @@ export const translations = {
     installStackDesc1: "Instala los",
     installStackDesc2: "elementos — servidores, skills y agentes — en un solo comando.",
     noItemsStack: "Este stack aún no tiene elementos.",
-    shareStackTitle: "Comparte este stack con tu equipo",
-    shareStackDesc: "Crea un equipo, añade estos elementos y comparte un comando de sincronización.",
+    shareStackTitle: "Comparte este stack",
+    shareStackDesc: "Copia el comando de instalación y compártelo — cualquiera puede tener el mismo entorno en segundos.",
     createTeam: "Crear equipo →",
 
     // Submit
