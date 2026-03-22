@@ -73,7 +73,7 @@ export const translations = {
 
     // Stacks list
     stacksTitle: "Stacks",
-    stacksDesc: "Pre-configured mixes of MCP servers, skills, and agents for specific workflows. Install an entire stack in one command.",
+    stacksDesc: "Give your team a shared AI setup in minutes — the same servers, skills, and agents, one install command. No more \"what tools are you using?\"",
     curatedStacks: "Curated",
     communityStacks: "Community",
     createStack: "+ Create stack",
@@ -82,8 +82,8 @@ export const translations = {
     skills_label: "skills",
     agents_label: "agents",
     stacksCuratedBadge: "Curated & community stacks",
-    stacksCreateCta: "Create your own stack",
-    stacksCreateDesc: "Mix servers, skills, and agents into a shareable workflow kit.",
+    stacksCreateCta: "Build your team's stack",
+    stacksCreateDesc: "Combine servers, skills, and agents into a shared setup your whole team can install with one command.",
     stacksSignIn: "Sign in to create →",
 
     // Stack detail
@@ -254,7 +254,7 @@ export const translations = {
 
     // Stacks list
     stacksTitle: "Stacks",
-    stacksDesc: "Combinaciones pre-configuradas de servidores MCP, skills y agentes para flujos de trabajo específicos. Instala un stack completo con un solo comando.",
+    stacksDesc: "Dale a tu equipo el mismo entorno de IA en minutos — los mismos servidores, skills y agentes, con un solo comando. Sin el \"¿qué herramientas usas tú?\"",
     curatedStacks: "Curados",
     communityStacks: "Comunidad",
     createStack: "+ Crear stack",
@@ -263,8 +263,8 @@ export const translations = {
     skills_label: "skills",
     agents_label: "agentes",
     stacksCuratedBadge: "Stacks curados y de comunidad",
-    stacksCreateCta: "Crea tu propio stack",
-    stacksCreateDesc: "Combina servidores, skills y agentes en un kit de flujo de trabajo compartible.",
+    stacksCreateCta: "Crea el stack de tu equipo",
+    stacksCreateDesc: "Combina servidores, skills y agentes en un entorno compartido que todo tu equipo puede instalar con un comando.",
     stacksSignIn: "Entra para crear →",
 
     // Stack detail

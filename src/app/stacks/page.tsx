@@ -6,13 +6,13 @@ import { auth } from "@/lib/auth";
 import { getT } from "@/lib/i18n";
 import { IconZap, IconSearch, IconDatabase, IconRocket, IconClipboard, IconShield } from "@/components/Icons";
 
-const STACK_ICONS: Record<string, { icon: React.ReactNode; bg: string }> = {
-  "full-stack-dev":   { icon: <IconZap size={18} />,       bg: "bg-blue-500/20 text-blue-400 border-blue-500/20" },
-  "research":         { icon: <IconSearch size={18} />,     bg: "bg-purple-500/20 text-purple-400 border-purple-500/20" },
-  "data-engineering": { icon: <IconDatabase size={18} />,   bg: "bg-cyan-500/20 text-cyan-400 border-cyan-500/20" },
-  "devops":           { icon: <IconRocket size={18} />,     bg: "bg-orange-500/20 text-orange-400 border-orange-500/20" },
-  "product-team":     { icon: <IconClipboard size={18} />,  bg: "bg-green-500/20 text-green-400 border-green-500/20" },
-  "security":         { icon: <IconShield size={18} />,     bg: "bg-red-500/20 text-red-400 border-red-500/20" },
+const STACK_ICONS: Record<string, { icon: React.ReactNode }> = {
+  "full-stack-dev":   { icon: <IconZap size={18} /> },
+  "research":         { icon: <IconSearch size={18} /> },
+  "data-engineering": { icon: <IconDatabase size={18} /> },
+  "devops":           { icon: <IconRocket size={18} /> },
+  "product-team":     { icon: <IconClipboard size={18} /> },
+  "security":         { icon: <IconShield size={18} /> },
 };
 
 export const metadata: Metadata = {
@@ -40,8 +40,8 @@ export default async function StacksPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-10 sm:mb-14 gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 bg-blue-500/10 text-blue-400 text-sm px-3 py-1 rounded-full mb-5 border border-blue-500/20">
-            <span className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
+          <div className="inline-flex items-center gap-2 bg-gray-800 text-gray-400 text-sm px-3 py-1 rounded-full mb-5 border border-gray-700">
+            <span className="w-1.5 h-1.5 bg-gray-500 rounded-full" />
             {t.stacksCuratedBadge}
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">{t.stacksTitle}</h1>
@@ -65,20 +65,20 @@ export default async function StacksPage() {
             <a key={stack.slug} href={`/stacks/${stack.slug}`}
               className="group block rounded-xl border border-gray-800 bg-gray-900 hover:border-gray-600 hover:bg-gray-800 transition-all hover:-translate-y-0.5 p-5">
               <div className="flex items-start gap-3 mb-3">
-                <span className={`flex items-center justify-center w-9 h-9 rounded-lg border shrink-0 ${STACK_ICONS[stack.slug]?.bg ?? "bg-gray-800 text-gray-400 border-gray-700"}`}>
+                <span className="flex items-center justify-center w-9 h-9 rounded-lg border bg-gray-800 text-gray-400 border-gray-700 shrink-0">
                   {STACK_ICONS[stack.slug]?.icon ?? stack.icon}
                 </span>
                 <div>
                   <h2 className="font-semibold text-white group-hover:text-blue-400 transition-colors">{stack.name}</h2>
                   <div className="flex items-center gap-2 mt-0.5">
                     {stack.servers.length > 0 && (
-                      <span className="text-xs text-blue-400/70">{stack.servers.length} {t.servers}</span>
+                      <span className="text-xs text-gray-500">{stack.servers.length} {t.servers}</span>
                     )}
                     {stack.skills.length > 0 && (
-                      <span className="text-xs text-purple-400/70">{stack.skills.length} {t.skills_label}</span>
+                      <span className="text-xs text-gray-500">{stack.skills.length} {t.skills_label}</span>
                     )}
                     {stack.agents.length > 0 && (
-                      <span className="text-xs text-orange-400/70">{stack.agents.length} {stack.agents.length === 1 ? "agent" : t.agents_label}</span>
+                      <span className="text-xs text-gray-500">{stack.agents.length} {stack.agents.length === 1 ? "agent" : t.agents_label}</span>
                     )}
                   </div>
                 </div>
@@ -108,9 +108,9 @@ export default async function StacksPage() {
                     <div>
                       <h2 className="font-semibold text-white group-hover:text-blue-400 transition-colors">{stack.name}</h2>
                       <div className="flex items-center gap-2 mt-0.5">
-                        {servers > 0 && <span className="text-xs text-blue-400/70">{servers} {t.servers}</span>}
-                        {skills > 0 && <span className="text-xs text-purple-400/70">{skills} {t.skills_label}</span>}
-                        {agents > 0 && <span className="text-xs text-orange-400/70">{agents} {t.agents_label}</span>}
+                        {servers > 0 && <span className="text-xs text-gray-500">{servers} {t.servers}</span>}
+                        {skills > 0 && <span className="text-xs text-gray-500">{skills} {t.skills_label}</span>}
+                        {agents > 0 && <span className="text-xs text-gray-500">{agents} {t.agents_label}</span>}
                         <span className="text-xs text-gray-600">{t.by} {stack.createdBy}</span>
                       </div>
                     </div>
@@ -126,13 +126,13 @@ export default async function StacksPage() {
       )}
 
       {!session && (
-        <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-6 text-center">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center">
           <h3 className="font-semibold text-white mb-2">{t.stacksCreateCta}</h3>
           <p className="text-sm text-gray-400 mb-4">
             {t.stacksCreateDesc}
           </p>
           <a href="/auth/signin?callbackUrl=/stacks/new"
-            className="inline-flex items-center gap-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            className="inline-flex items-center gap-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
             {t.stacksSignIn}
           </a>
         </div>
