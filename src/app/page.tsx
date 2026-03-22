@@ -9,6 +9,7 @@ import { Pagination } from "@/components/Pagination";
 import { getT } from "@/lib/i18n";
 import type { SortMode } from "@/lib/servers";
 import { IconGrid, IconList } from "@/components/Icons";
+import { CliCommand } from "@/components/CliCommand";
 
 export const dynamic = "force-dynamic";
 
@@ -117,9 +118,7 @@ export default async function HomePage({
             {t.heroDesc}
           </p>
           <div className="mt-6 flex flex-col items-center gap-2">
-            <div className="bg-gray-900 border border-gray-800 rounded-lg px-5 py-2.5 font-mono text-sm text-gray-300">
-              <span className="text-gray-600 select-none">$ </span>npx @sallyheller/mcphub install <span className="text-blue-400">github</span>
-            </div>
+            <CliCommand />
             <p className="text-xs text-gray-600">auto-installs to Claude Code, Cursor, Continue — whatever you have</p>
           </div>
 
