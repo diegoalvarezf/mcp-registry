@@ -205,13 +205,25 @@ export function ModelsClient() {
     });
 
   return (
-    <div>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+      {/* Header */}
+      <div className="mb-10 sm:mb-14">
+        <div className="inline-flex items-center gap-2 bg-green-500/10 text-green-400 text-sm px-3 py-1 rounded-full mb-5 border border-green-500/20">
+          <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
+          Local AI
+        </div>
+        <h1 className="text-3xl sm:text-4xl font-bold mb-3">Run Local</h1>
+        <p className="text-gray-400 text-base sm:text-lg max-w-2xl">
+          Find open models that fit your hardware. Filter by tool use support, context window, and get the install command for Ollama or LM Studio.
+        </p>
+      </div>
+
       {/* Hardware panel */}
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-5 mb-8">
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-8">
         <div className="flex flex-wrap items-start gap-6">
           {/* GPU */}
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Detected GPU</p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Detected GPU</p>
             {detected ? (
               <div className="flex flex-wrap gap-6">
                 <div>
@@ -344,7 +356,7 @@ export function ModelsClient() {
           </div>
 
           {/* Runner toggle */}
-          <div className="flex items-center gap-1 bg-gray-900 border border-gray-800 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1">
             <button
               onClick={() => setRunner("ollama")}
               className={`px-3 py-1.5 text-sm rounded transition-colors ${
@@ -387,10 +399,10 @@ export function ModelsClient() {
           return (
             <div
               key={model.id}
-              className={`rounded-lg border p-4 transition-all flex flex-col ${
+              className={`rounded-xl border p-5 transition-all flex flex-col ${
                 model.grade === "F"
                   ? "border-gray-800 bg-gray-900/50 opacity-50"
-                  : "border-gray-800 bg-gray-900 hover:border-gray-600 hover:-translate-y-0.5"
+                  : "border-gray-800 bg-gray-900 hover:border-gray-600 hover:bg-gray-800 hover:-translate-y-0.5"
               }`}
             >
               {/* Header */}
@@ -458,4 +470,5 @@ export function ModelsClient() {
       )}
     </div>
   );
+
 }
