@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 
+const LAST_UPDATED = "March 22, 2026";
+
 type ToolCalling = "full" | "partial" | "none";
 type Runner = "ollama" | "lmstudio";
 
@@ -26,6 +28,7 @@ const MODELS: Model[] = [
   { id: "llama3.2-1b", name: "Llama 3.2 1B", provider: "Meta", params: "1B", vramRequired: 1, ramRequired: 4, capabilities: ["chat"], toolCalling: "full", contextWindow: 128, license: "commercial", description: "Lightest Llama. Runs on anything.", ollamaId: "llama3.2:1b", lmStudioId: "lmstudio-community/Llama-3.2-1B-Instruct-GGUF" },
   { id: "llama3.2-3b", name: "Llama 3.2 3B", provider: "Meta", params: "3B", vramRequired: 2, ramRequired: 6, capabilities: ["chat", "code"], toolCalling: "full", contextWindow: 128, license: "commercial", description: "Fast and capable for everyday tasks.", ollamaId: "llama3.2:3b", lmStudioId: "lmstudio-community/Llama-3.2-3B-Instruct-GGUF" },
   { id: "llama3.1-8b", name: "Llama 3.1 8B", provider: "Meta", params: "8B", vramRequired: 5, ramRequired: 8, capabilities: ["chat", "code", "agents"], toolCalling: "full", contextWindow: 128, license: "commercial", description: "Best quality/size ratio for most use cases.", ollamaId: "llama3.1:8b", lmStudioId: "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF" },
+  { id: "llama3.3-70b", name: "Llama 3.3 70B", provider: "Meta", params: "70B", vramRequired: 40, ramRequired: 48, capabilities: ["chat", "code", "agents"], toolCalling: "full", contextWindow: 128, license: "commercial", description: "Better than 3.1 70B with the same VRAM. Meta's best open 70B.", ollamaId: "llama3.3:70b", lmStudioId: "lmstudio-community/Llama-3.3-70B-Instruct-GGUF" },
   { id: "llama3.1-70b", name: "Llama 3.1 70B", provider: "Meta", params: "70B", vramRequired: 40, ramRequired: 48, capabilities: ["chat", "code", "agents"], toolCalling: "full", contextWindow: 128, license: "commercial", description: "Near-frontier quality locally.", ollamaId: "llama3.1:70b", lmStudioId: "lmstudio-community/Meta-Llama-3.1-70B-Instruct-GGUF" },
   { id: "llama3.1-405b", name: "Llama 3.1 405B", provider: "Meta", params: "405B", vramRequired: 230, ramRequired: 256, capabilities: ["chat", "code", "agents"], toolCalling: "full", contextWindow: 128, license: "commercial", description: "Largest open model. Needs serious hardware.", ollamaId: "llama3.1:405b" },
 
@@ -41,6 +44,7 @@ const MODELS: Model[] = [
   { id: "mistral-7b", name: "Mistral 7B", provider: "Mistral", params: "7B", vramRequired: 5, ramRequired: 8, capabilities: ["chat", "code"], toolCalling: "partial", contextWindow: 32, license: "commercial", description: "Fast, efficient, great instruction following.", ollamaId: "mistral:7b", lmStudioId: "lmstudio-community/Mistral-7B-Instruct-v0.3-GGUF" },
   { id: "mixtral-8x7b", name: "Mixtral 8×7B", provider: "Mistral", params: "47B MoE", vramRequired: 26, ramRequired: 32, capabilities: ["chat", "code", "agents"], toolCalling: "partial", contextWindow: 32, license: "commercial", description: "MoE model with 12.9B active params.", ollamaId: "mixtral:8x7b", lmStudioId: "lmstudio-community/Mixtral-8x7B-Instruct-v0.1-GGUF" },
   { id: "mistral-small-22b", name: "Mistral Small 22B", provider: "Mistral", params: "22B", vramRequired: 14, ramRequired: 24, capabilities: ["chat", "code", "agents"], toolCalling: "full", contextWindow: 32, license: "commercial", description: "Best small Mistral for coding and agents.", ollamaId: "mistral-small", lmStudioId: "lmstudio-community/Mistral-Small-Instruct-2409-GGUF" },
+  { id: "mistral-small-3-24b", name: "Mistral Small 3", provider: "Mistral", params: "24B", vramRequired: 15, ramRequired: 24, capabilities: ["chat", "code", "agents"], toolCalling: "full", contextWindow: 32, license: "commercial", description: "Latest Mistral Small. Faster and more accurate than its predecessor.", ollamaId: "mistral-small3", lmStudioId: "lmstudio-community/Mistral-Small-3.1-24B-Instruct-2503-GGUF" },
 
   // ── Phi ────────────────────────────────────────────────────────────────────
   { id: "phi3-mini", name: "Phi-3 Mini", provider: "Microsoft", params: "3.8B", vramRequired: 2.5, ramRequired: 6, capabilities: ["chat", "code"], toolCalling: "partial", contextWindow: 128, license: "commercial", description: "Punches above its weight. Great for coding.", ollamaId: "phi3:mini", lmStudioId: "microsoft/Phi-3-mini-128k-instruct-gguf" },
@@ -48,11 +52,13 @@ const MODELS: Model[] = [
   { id: "phi4", name: "Phi-4", provider: "Microsoft", params: "14B", vramRequired: 9, ramRequired: 16, capabilities: ["chat", "code", "agents"], toolCalling: "full", contextWindow: 16, license: "commercial", description: "Latest Phi. Excellent at STEM and tool use.", ollamaId: "phi4", lmStudioId: "microsoft/phi-4-gguf" },
 
   // ── Gemma ──────────────────────────────────────────────────────────────────
-  { id: "gemma2-2b", name: "Gemma 2 2B", provider: "Google", params: "2B", vramRequired: 1.5, ramRequired: 4, capabilities: ["chat"], toolCalling: "none", contextWindow: 8, license: "commercial", description: "Google's smallest, surprisingly good.", ollamaId: "gemma2:2b", lmStudioId: "lmstudio-community/gemma-2-2b-it-GGUF" },
-  { id: "gemma2-9b", name: "Gemma 2 9B", provider: "Google", params: "9B", vramRequired: 6, ramRequired: 10, capabilities: ["chat", "code"], toolCalling: "partial", contextWindow: 8, license: "commercial", description: "Great quality at 9B.", ollamaId: "gemma2:9b", lmStudioId: "lmstudio-community/gemma-2-9b-it-GGUF" },
-  { id: "gemma2-27b", name: "Gemma 2 27B", provider: "Google", params: "27B", vramRequired: 17, ramRequired: 24, capabilities: ["chat", "code"], toolCalling: "partial", contextWindow: 8, license: "commercial", description: "Google's best open model.", ollamaId: "gemma2:27b", lmStudioId: "lmstudio-community/gemma-2-27b-it-GGUF" },
+  { id: "gemma3-1b", name: "Gemma 3 1B", provider: "Google", params: "1B", vramRequired: 1, ramRequired: 4, capabilities: ["chat"], toolCalling: "partial", contextWindow: 32, license: "commercial", description: "Google's lightest model. Runs on anything.", ollamaId: "gemma3:1b", lmStudioId: "lmstudio-community/gemma-3-1b-it-GGUF" },
+  { id: "gemma3-4b", name: "Gemma 3 4B", provider: "Google", params: "4B", vramRequired: 3, ramRequired: 6, capabilities: ["chat", "code"], toolCalling: "full", contextWindow: 128, license: "commercial", description: "Strong at 4B. Solid tool use and multilingual support.", ollamaId: "gemma3:4b", lmStudioId: "lmstudio-community/gemma-3-4b-it-GGUF" },
+  { id: "gemma3-12b", name: "Gemma 3 12B", provider: "Google", params: "12B", vramRequired: 8, ramRequired: 12, capabilities: ["chat", "code", "agents"], toolCalling: "full", contextWindow: 128, license: "commercial", description: "Best Gemma 3 for everyday tasks. Great instruction following.", ollamaId: "gemma3:12b", lmStudioId: "lmstudio-community/gemma-3-12b-it-GGUF" },
+  { id: "gemma3-27b", name: "Gemma 3 27B", provider: "Google", params: "27B", vramRequired: 17, ramRequired: 24, capabilities: ["chat", "code", "agents"], toolCalling: "full", contextWindow: 128, license: "commercial", description: "Google's flagship open model. Rivals much larger models.", ollamaId: "gemma3:27b", lmStudioId: "lmstudio-community/gemma-3-27b-it-GGUF" },
 
   // ── DeepSeek ───────────────────────────────────────────────────────────────
+  { id: "deepseek-v3", name: "DeepSeek V3", provider: "DeepSeek", params: "236B MoE", vramRequired: 80, ramRequired: 96, capabilities: ["chat", "code", "agents"], toolCalling: "full", contextWindow: 128, license: "open", description: "DeepSeek's flagship general model. Rivals GPT-4 class. Needs serious hardware.", ollamaId: "deepseek-v3", lmStudioId: "lmstudio-community/DeepSeek-V3-GGUF" },
   { id: "deepseek-r1-7b", name: "DeepSeek R1 7B", provider: "DeepSeek", params: "7B", vramRequired: 5, ramRequired: 8, capabilities: ["chat", "agents"], toolCalling: "partial", contextWindow: 128, license: "open", description: "Reasoning model. Chain-of-thought distilled.", ollamaId: "deepseek-r1:7b", lmStudioId: "lmstudio-community/DeepSeek-R1-Distill-Qwen-7B-GGUF" },
   { id: "deepseek-r1-14b", name: "DeepSeek R1 14B", provider: "DeepSeek", params: "14B", vramRequired: 9, ramRequired: 16, capabilities: ["chat", "agents"], toolCalling: "partial", contextWindow: 128, license: "open", description: "Strong reasoning at 14B.", ollamaId: "deepseek-r1:14b", lmStudioId: "lmstudio-community/DeepSeek-R1-Distill-Qwen-14B-GGUF" },
   { id: "deepseek-r1-32b", name: "DeepSeek R1 32B", provider: "DeepSeek", params: "32B", vramRequired: 20, ramRequired: 32, capabilities: ["chat", "agents"], toolCalling: "partial", contextWindow: 128, license: "open", description: "Top open reasoning model.", ollamaId: "deepseek-r1:32b", lmStudioId: "lmstudio-community/DeepSeek-R1-Distill-Qwen-32B-GGUF" },
@@ -164,7 +170,7 @@ const TC_DOT: Record<ToolCalling, string> = {
   none: "bg-gray-600",
 };
 
-const PROVIDERS = ["All", "Meta", "Alibaba", "Mistral", "Microsoft", "Google", "DeepSeek"];
+const PROVIDERS = ["All", "Meta", "Alibaba", "Google", "Mistral", "Microsoft", "DeepSeek"];
 const CAPS = ["chat", "code", "agents", "vision"];
 
 function installCommand(model: Model, runner: Runner): string | null {
@@ -216,6 +222,7 @@ export function ModelsClient() {
         <p className="text-gray-400 text-base sm:text-lg max-w-2xl">
           Find open models that fit your hardware. Filter by tool use support, context window, and get the install command for Ollama or LM Studio.
         </p>
+        <p className="text-xs text-gray-600 mt-3">Updated {LAST_UPDATED} · New models are released constantly — <a href="https://github.com/sallyheller/mcp-registry" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 underline underline-offset-2">contributions welcome</a></p>
       </div>
 
       {/* Hardware panel */}
