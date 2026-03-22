@@ -148,16 +148,6 @@ export default async function ServerPage({ params }: { params: { slug: string } 
               {t.viewOnGitHub}
               <IconExternalLink size={12} className="text-gray-600 ml-auto" />
             </a>
-            <a
-              href={`/compare?a=${server.slug}`}
-              className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300 transition-colors"
-            >
-              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 20V10M12 20V4M6 20v-6"/>
-              </svg>
-              Compare with another
-            </a>
-
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Repository</p>
               <span className="font-mono text-xs text-gray-400">{repoIdentifier}</span>
