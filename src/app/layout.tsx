@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import "./globals.css";
 import { auth } from "@/lib/auth";
 import { NavProfile } from "@/components/NavProfile";
+import { MobileMenu } from "@/components/MobileMenu";
 import { getT } from "@/lib/i18n";
 import { IconHexagon } from "@/components/Icons";
 
@@ -45,6 +46,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {t.docs}
             </a>
             <NavProfile user={session?.user ?? null} />
+            <MobileMenu links={[
+              { label: t.stacks, href: "/stacks" },
+              { label: "Run Local", href: "/run-local" },
+              { label: "Audits", href: "/audits" },
+              { label: t.cli, href: "/install-cli" },
+              { label: t.docs, href: "https://modelcontextprotocol.io", external: true },
+            ]} />
           </div>
         </nav>
         <main>{children}</main>
