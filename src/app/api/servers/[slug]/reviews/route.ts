@@ -59,13 +59,32 @@ export async function POST(
     );
   }
 
-  const review = await prisma.review.create({
-    data: {
-      serverId: server.id,
-      rating: parsed.data.rating,
-      comment: parsed.data.comment ? stripHtml(parsed.data.comment) : null,
-      author: stripHtml(parsed.data.author),
-    },
+  // Create review and update cached avgRating + reviewCount in a transaction
+  const [review] = await prisma.$transaction(async (tx) => {
+    const newReview = await tx.review.create({
+      data: {
+        serverId: server.id,
+        rating: parsed.data.rating,
+        comment: parsed.data.comment ? stripHtml(parsed.data.comment) : null,
+        author: stripHtml(parsed.data.author),
+      },
+    });
+
+    const agg = await tx.review.aggregate({
+      where: { serverId: server.id },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
+
+    await tx.server.update({
+      where: { id: server.id },
+      data: {
+        avgRating: agg._avg.rating ? Math.round(agg._avg.rating * 10) / 10 : null,
+        reviewCount: agg._count.rating,
+      },
+    });
+
+    return [newReview];
   });
 
   return NextResponse.json({ review }, { status: 201 });
