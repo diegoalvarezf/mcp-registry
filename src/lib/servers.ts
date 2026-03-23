@@ -13,6 +13,11 @@ function parse(server: any): McpServer {
   };
 }
 
+function calcAvgRating(reviews: { rating: number }[]) {
+  if (!reviews.length) return undefined;
+  return Math.round((reviews.reduce((a, r) => a + r.rating, 0) / reviews.length) * 10) / 10;
+}
+
 export type SortMode = "featured" | "popular" | "trending" | "hot" | "new";
 
 export async function getServers(opts?: {
@@ -26,7 +31,6 @@ export async function getServers(opts?: {
   const page = Math.max(1, opts?.page ?? 1);
   const sort = opts?.sort ?? "featured";
 
-  // When a query is provided, use PostgreSQL full-text search
   if (opts?.query) {
     return getServersWithFullTextSearch({ ...opts, page, sort, query: opts.query });
   }
@@ -40,11 +44,22 @@ export async function getServers(opts?: {
 
   const [total, servers] = await Promise.all([
     prisma.server.count({ where }),
-    // avgRating and reviewCount are cached in the DB — no need to include reviews
-    prisma.server.findMany({ where, orderBy, skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE }),
+    prisma.server.findMany({
+      where,
+      orderBy,
+      include: { reviews: { select: { rating: true } } },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
   ]);
 
-  return { servers: servers.map(parse), total, pages: Math.ceil(total / PAGE_SIZE) };
+  const parsed = servers.map((s) => ({
+    ...parse(s),
+    avgRating: calcAvgRating(s.reviews),
+    reviewCount: s.reviews.length,
+  }));
+
+  return { servers: parsed, total, pages: Math.ceil(total / PAGE_SIZE) };
 }
 
 async function getServersWithFullTextSearch(opts: {
@@ -97,13 +112,21 @@ async function getServersWithFullTextSearch(opts: {
 
   if (ids.length === 0) return { servers: [], total, pages: Math.ceil(total / PAGE_SIZE) };
 
-  const servers = await prisma.server.findMany({ where: { id: { in: ids } } });
+  const servers = await prisma.server.findMany({
+    where: { id: { in: ids } },
+    include: { reviews: { select: { rating: true } } },
+  });
 
-  // Preserve SQL-ranked order
   const byId = new Map(servers.map((s) => [s.id, s]));
   const ordered = ids.map((id) => byId.get(id)!).filter(Boolean);
 
-  return { servers: ordered.map(parse), total, pages: Math.ceil(total / PAGE_SIZE) };
+  const parsed = ordered.map((s) => ({
+    ...parse(s),
+    avgRating: calcAvgRating(s.reviews),
+    reviewCount: s.reviews.length,
+  }));
+
+  return { servers: parsed, total, pages: Math.ceil(total / PAGE_SIZE) };
 }
 
 function buildOrderBy(sort: SortMode): any[] {
@@ -127,8 +150,15 @@ function buildOrderBySql(sort: SortMode): string {
 }
 
 export async function getServersBySlugs(slugs: string[]): Promise<McpServer[]> {
-  const servers = await prisma.server.findMany({ where: { slug: { in: slugs } } });
-  return servers.map(parse);
+  const servers = await prisma.server.findMany({
+    where: { slug: { in: slugs } },
+    include: { reviews: { select: { rating: true } } },
+  });
+  return servers.map((s) => ({
+    ...parse(s),
+    avgRating: calcAvgRating(s.reviews),
+    reviewCount: s.reviews.length,
+  }));
 }
 
 export async function getServer(
@@ -139,5 +169,10 @@ export async function getServer(
     include: { reviews: { orderBy: { createdAt: "desc" } } },
   });
   if (!server) return null;
-  return { ...parse(server), reviews: server.reviews };
+  return {
+    ...parse(server),
+    avgRating: calcAvgRating(server.reviews),
+    reviewCount: server.reviews.length,
+    reviews: server.reviews,
+  };
 }
