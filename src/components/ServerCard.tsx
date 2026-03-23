@@ -138,13 +138,10 @@ export function ServerCard({ server, featured, rank }: { server: McpServer; feat
                   : server.stars.toLocaleString()}
               </span>
             )}
-            {server.downloadCount > 0 && (
-              <span className="flex items-center gap-1">
-                <IconDownload size={11} />
-                {server.downloadCount.toLocaleString()}
-              </span>
-            )}
-            <span className="font-mono">{server.transport}</span>
+            <span className="flex items-center gap-1">
+              <IconDownload size={11} />
+              {server.downloadCount.toLocaleString()}
+            </span>
           </div>
         </div>
       </a>
