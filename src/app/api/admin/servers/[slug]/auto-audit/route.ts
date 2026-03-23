@@ -234,9 +234,9 @@ export async function POST(
       riskLevel = result.riskLevel;
       reason = result.reason;
       usedClaude = true;
-    } catch {
+    } catch (err) {
       riskLevel = "unknown";
-      reason = "Claude unavailable";
+      reason = `Claude unavailable: ${err instanceof Error ? err.message : String(err)}`;
     }
   } else {
     // ── Tier 1: trusted org → safe immediately ──────────────────────────
@@ -280,9 +280,9 @@ export async function POST(
           riskLevel = result.riskLevel;
           reason = result.reason;
           usedClaude = true;
-        } catch {
+        } catch (err) {
           riskLevel = verdict === "medium" ? "medium" : "low";
-          reason = "Claude unavailable, used static analysis";
+          reason = `Claude unavailable (${err instanceof Error ? err.message : String(err)}), used static analysis`;
         }
       }
     }
