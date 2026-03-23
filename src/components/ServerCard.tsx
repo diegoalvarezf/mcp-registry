@@ -130,6 +130,14 @@ export function ServerCard({ server, featured, rank }: { server: McpServer; feat
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span className="truncate">{server.authorName}</span>
           <div className="flex items-center gap-2 shrink-0 ml-2">
+            {server.stars > 0 && (
+              <span className="flex items-center gap-1 text-yellow-500/80">
+                <IconStar size={11} />
+                {server.stars >= 1000
+                  ? `${(server.stars / 1000).toFixed(1)}k`
+                  : server.stars.toLocaleString()}
+              </span>
+            )}
             {server.downloadCount > 0 && (
               <span className="flex items-center gap-1">
                 <IconDownload size={11} />
