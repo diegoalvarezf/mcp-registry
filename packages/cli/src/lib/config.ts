@@ -47,6 +47,8 @@ export function installForClient(
 
   if (clientId === "continue") {
     installForContinue(configPath, server.slug, entry);
+  } else if (clientId === "copilot") {
+    installForCopilot(configPath, server.slug, entry);
   } else {
     // Claude Code, Claude Desktop, Cursor, OpenClaw — todos usan formato mcpServers
     installMcpServersFormat(configPath, server.slug, entry);
@@ -59,6 +61,18 @@ function installMcpServersFormat(configPath: string, slug: string, entry: McpEnt
   const config = readJson(configPath);
   if (!config.mcpServers) config.mcpServers = {};
   config.mcpServers[slug] = entry;
+  writeJson(configPath, config);
+}
+
+function installForCopilot(configPath: string, slug: string, entry: McpEntry): void {
+  const config = readJson(configPath);
+  if (!config.servers) config.servers = {};
+  config.servers[slug] = {
+    type: "stdio",
+    command: entry.command,
+    args: entry.args,
+    ...(entry.env ? { env: entry.env } : {}),
+  };
   writeJson(configPath, config);
 }
 
@@ -82,6 +96,9 @@ export function isAlreadyInstalled(clientId: ClientId, slug: string): boolean {
   if (clientId === "continue") {
     return Array.isArray(config.mcpServers) && config.mcpServers.some((s: any) => s.name === slug);
   }
+  if (clientId === "copilot") {
+    return !!(config.servers?.[slug]);
+  }
   return !!(config.mcpServers?.[slug]);
 }
 
@@ -91,6 +108,8 @@ export function removeFromClient(clientId: ClientId, slug: string): void {
   const config = readJson(configPath);
   if (clientId === "continue") {
     config.mcpServers = (config.mcpServers ?? []).filter((s: any) => s.name !== slug);
+  } else if (clientId === "copilot") {
+    if (config.servers) delete config.servers[slug];
   } else {
     if (config.mcpServers) delete config.mcpServers[slug];
   }

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 
-export type ClientId = "claude-code" | "claude-desktop" | "cursor" | "continue" | "openclaw";
+export type ClientId = "claude-code" | "claude-desktop" | "cursor" | "continue" | "openclaw" | "copilot";
 
 export interface DetectedClient {
   id: ClientId;
@@ -37,6 +37,14 @@ const CLIENT_CONFIG_PATHS: Record<ClientId, string[]> = {
   openclaw: [
     "~/.openclaw/openclaw.json",
   ],
+  copilot: [
+    "%APPDATA%/Code/User/mcp.json",
+    "%APPDATA%/Code - Insiders/User/mcp.json",
+    "~/Library/Application Support/Code/User/mcp.json",
+    "~/Library/Application Support/Code - Insiders/User/mcp.json",
+    "~/.config/Code/User/mcp.json",
+    "~/.config/Code - Insiders/User/mcp.json",
+  ],
 };
 
 const CLIENT_LABELS: Record<ClientId, string> = {
@@ -45,6 +53,7 @@ const CLIENT_LABELS: Record<ClientId, string> = {
   cursor: "Cursor",
   continue: "Continue.dev",
   openclaw: "OpenClaw",
+  copilot: "GitHub Copilot (VS Code)",
 };
 
 export function detectClients(): DetectedClient[] {
