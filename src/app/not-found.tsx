@@ -6,12 +6,20 @@ export default function NotFound() {
       <p className="text-gray-400 mb-8">
         This page doesn't exist or the server you're looking for has been removed.
       </p>
-      <a
-        href="/"
-        className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-medium px-6 py-3 rounded-xl transition-colors"
-      >
-        ← Back to MCPHub
-      </a>
+      <div className="flex items-center justify-center gap-3">
+        <a
+          href="/"
+          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-medium px-6 py-3 rounded-xl transition-colors"
+        >
+          ← Browse servers
+        </a>
+        <a
+          href="/submit"
+          className="inline-flex items-center gap-2 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white font-medium px-6 py-3 rounded-xl transition-colors"
+        >
+          Submit a server
+        </a>
+      </div>
     </div>
   );
 }
