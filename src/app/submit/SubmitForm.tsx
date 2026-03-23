@@ -1,6 +1,112 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { MarkdownContent } from "@/components/MarkdownContent";
+
+const TEMPLATES: Record<string, { label: string; content: string }[]> = {
+  prompt: [
+    {
+      label: "Code review",
+      content: `Review the current changes or selected code.
+
+## What to check
+
+- **Correctness** — logic errors, edge cases, null handling
+- **Security** — injection risks, exposed secrets, auth gaps
+- **Performance** — N+1 queries, blocking calls, unnecessary work
+- **Readability** — naming, complexity, duplication
+
+## Output format
+
+For each issue: **[CRITICAL|HIGH|MEDIUM|LOW]** \`file:line\` — description and fix suggestion.
+
+If nothing to flag, say so and call out what was done well.`,
+    },
+    {
+      label: "Write tests",
+      content: `Write comprehensive tests for the selected code or current file.
+
+## Cover
+
+- Happy path (expected inputs and outputs)
+- Edge cases (empty, null, boundary values)
+- Error conditions (invalid inputs, exceptions)
+
+## Rules
+
+- Use the testing framework already in the project
+- Test behavior, not implementation
+- Each test name should read as a sentence: "returns empty array when no users found"
+- Mock external dependencies (DB, APIs, filesystem)`,
+    },
+    {
+      label: "Explain code",
+      content: `Explain the selected code or current file in plain English.
+
+1. **What it does** — high-level purpose in 1-2 sentences
+2. **How it works** — step-by-step walkthrough
+3. **Key concepts** — patterns or algorithms used
+4. **Gotchas** — edge cases or things to watch out for
+
+Adjust depth to code complexity. Use analogies where helpful.`,
+    },
+  ],
+  agent: [
+    {
+      label: "Senior engineer",
+      content: `You are a senior software engineer with 10+ years of experience building production systems.
+
+## Principles
+
+- Write the simplest code that solves the problem — no over-engineering
+- Optimize for readability first, performance second
+- Always consider security implications
+- Make incremental changes and verify each step
+
+## When implementing
+
+1. Understand the full context before writing code
+2. Ask clarifying questions if requirements are ambiguous
+3. Implement the minimal working solution
+4. Point out adjacent issues you notice (but don't fix unless asked)`,
+    },
+    {
+      label: "Code reviewer",
+      content: `You are a meticulous code reviewer focused on shipping safe, maintainable software.
+
+## Your mindset
+
+- Think like an attacker to spot security issues
+- Think like the next developer who will read this code
+- Think like the on-call engineer who will debug this at 3am
+
+## What you check
+
+- Logic correctness and edge cases
+- Security vulnerabilities (OWASP Top 10)
+- Performance issues (N+1, blocking calls, memory leaks)
+- Test coverage gaps
+- Documentation where non-obvious`,
+    },
+    {
+      label: "DevOps engineer",
+      content: `You are a DevOps engineer focused on CI/CD, infrastructure, and reliability.
+
+## Core principles
+
+- Automate everything that can be automated
+- Design for failure — assume services will go down
+- Observability: if you can't measure it, you can't fix it
+- Least privilege for all credentials and services
+
+## When helping
+
+- Prefer managed services where the trade-off makes sense
+- Always include rollback strategy before deployment strategy
+- Think about monitoring and alerting from the start`,
+    },
+  ],
+};
 
 type SubmitType = "server" | "prompt" | "agent";
 
@@ -42,6 +148,7 @@ export function SubmitForm({ defaultType }: { defaultType?: SubmitType }) {
   const [content, setContent] = useState("");
   const [fetching, setFetching] = useState(false);
   const [fetchError, setFetchError] = useState("");
+  const [preview, setPreview] = useState(false);
 
   const color = TYPE_OPTIONS.find(t => t.id === type)!.color;
   const cm = colorMap[color];
@@ -315,21 +422,67 @@ export function SubmitForm({ defaultType }: { defaultType?: SubmitType }) {
       {/* Skill/Agent content */}
       {type !== "server" && (
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
-              {type === "agent" ? "AGENT.md content *" : "SKILL.md content *"}
-            </label>
-            <span className="text-xs text-gray-600">Fetched from repo or paste manually</span>
+          {/* Templates */}
+          <div className="mb-3">
+            <p className="text-xs text-gray-500 mb-2">Start from a template:</p>
+            <div className="flex flex-wrap gap-2">
+              {TEMPLATES[type]?.map(tpl => (
+                <button
+                  key={tpl.label}
+                  type="button"
+                  onClick={() => { setContent(tpl.content); setPreview(false); }}
+                  className="text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white transition-colors"
+                >
+                  {tpl.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <textarea
-            value={content} onChange={e => setContent(e.target.value)} required
-            rows={14}
-            placeholder={type === "agent"
-              ? "You are a senior software engineer with 15 years of experience...\n\n## Your principles\n- Write clean, maintainable code\n- Always consider edge cases..."
-              : "Review the following code and provide:\n\n1. **Summary** of what the code does\n2. **Issues** found (bugs, security, performance)\n3. **Suggestions** for improvement\n\n```\n$SELECTION\n```"
-            }
-            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-gray-500 font-mono leading-relaxed resize-y"
-          />
+
+          {/* Write / Preview tabs */}
+          <div className="border border-gray-700 rounded-lg overflow-hidden">
+            <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-3 py-2">
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+                {type === "agent" ? "AGENT.md" : "SKILL.md"} *
+              </label>
+              <div className="flex rounded-md overflow-hidden border border-gray-700 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setPreview(false)}
+                  className={`px-3 py-1 transition-colors ${!preview ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300"}`}
+                >
+                  Write
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreview(true)}
+                  className={`px-3 py-1 transition-colors ${preview ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300"}`}
+                >
+                  Preview
+                </button>
+              </div>
+            </div>
+
+            {preview ? (
+              <div className="bg-gray-900 px-4 py-4 min-h-[280px]">
+                {content ? (
+                  <MarkdownContent content={content} />
+                ) : (
+                  <p className="text-gray-600 text-sm italic">Nothing to preview yet.</p>
+                )}
+              </div>
+            ) : (
+              <textarea
+                value={content} onChange={e => setContent(e.target.value)} required
+                rows={14}
+                placeholder={type === "agent"
+                  ? "You are a senior software engineer...\n\n## Principles\n- Write clean, maintainable code\n..."
+                  : "Review the current code changes.\n\n## What to check\n\n- Correctness\n- Security\n- Performance\n..."
+                }
+                className="w-full bg-gray-950 px-3 py-3 text-sm text-gray-200 placeholder-gray-600 focus:outline-none font-mono leading-relaxed resize-y"
+              />
+            )}
+          </div>
         </div>
       )}
 
