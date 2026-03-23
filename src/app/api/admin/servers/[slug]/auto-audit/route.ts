@@ -133,7 +133,8 @@ Respond ONLY with JSON (no markdown):
     }],
   });
 
-  const text = message.content[0].type === "text" ? message.content[0].text.trim() : "";
+  const raw = message.content[0].type === "text" ? message.content[0].text.trim() : "";
+  const text = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
   try {
     const parsed = JSON.parse(text);
     if (["safe", "low", "medium", "high"].includes(parsed.riskLevel)) {
@@ -141,7 +142,7 @@ Respond ONLY with JSON (no markdown):
     }
   } catch { /* fallback */ }
 
-  return { riskLevel: "low", reason: "Could not parse analysis" };
+  return { riskLevel: "low", reason: `Could not parse analysis: ${raw.slice(0, 120)}` };
 }
 
 // ── Main handler ──────────────────────────────────────────────────────────
