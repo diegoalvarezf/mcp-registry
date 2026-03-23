@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { submitServerSchema } from "@/lib/validations";
 import { auth } from "@/lib/auth";
+import { rateLimit, getIp } from "@/lib/rate-limit";
+import { sanitizeStrings } from "@/lib/sanitize";
 
 function slugify(name: string): string {
   return name
@@ -53,8 +55,23 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ servers: results, total: results.length });
 }
 
-// POST /api/servers — submit a new server
+// POST /api/servers — submit a new server (5 submissions per hour per IP)
 export async function POST(req: NextRequest) {
+  const ip = getIp(req);
+  const rl = rateLimit(ip, "POST /api/servers", 5, 60 * 60 * 1000);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Try again later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
+  }
+
   const session = await auth();
   const body = await req.json().catch(() => null);
   if (!body) {
@@ -69,7 +86,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const data = parsed.data;
+  const data = sanitizeStrings(parsed.data as any);
   const slug = slugify(data.name);
 
   const existing = await prisma.server.findUnique({ where: { slug } });

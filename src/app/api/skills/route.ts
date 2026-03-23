@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSkills } from "@/lib/skills-db";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { rateLimit, getIp } from "@/lib/rate-limit";
+import { stripHtml } from "@/lib/sanitize";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -14,11 +16,29 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(result);
 }
 
+// POST — 10 skill submissions per hour per IP
 export async function POST(req: NextRequest) {
+  const ip = getIp(req);
+  const rl = rateLimit(ip, "POST /api/skills", 10, 60 * 60 * 1000);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Try again later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
+  }
+
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+
   const { slug, name, description, type, content, tags, repoUrl, published } = body;
 
   if (!slug || !name || !description || !content) {
@@ -34,8 +54,8 @@ export async function POST(req: NextRequest) {
     const skill = await prisma.skill.create({
       data: {
         slug: slug.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
-        name,
-        description,
+        name: stripHtml(name),
+        description: stripHtml(description),
         type: type ?? "prompt",
         content,
         tags: JSON.stringify(tags ?? []),

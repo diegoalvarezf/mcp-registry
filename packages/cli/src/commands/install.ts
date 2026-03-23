@@ -22,14 +22,18 @@ export async function installCommand(slug: string, envOverrides: Record<string, 
 
   // Prompt only for required env vars not already provided via --env
   const envValues: Record<string, string> = { ...envOverrides };
+  const SENSITIVE_RE = /key|token|secret|password|passwd|credential|auth|api_?key/i;
+
   const missing = (server.envVars ?? []).filter(
     (ev) => ev.required && !envValues[ev.name]?.trim()
   );
   for (const ev of missing) {
+    const isSensitive = SENSITIVE_RE.test(ev.name);
     const { value } = await inquirer.prompt<{ value: string }>([{
-      type: "input",
+      type: isSensitive ? "password" : "input",
       name: "value",
-      message: `${chalk.cyan(ev.name)}  ${chalk.gray(ev.description)}${ev.example ? chalk.gray(` (e.g. ${ev.example})`) : ""}`,
+      message: `${chalk.cyan(ev.name)}  ${chalk.gray(ev.description)}${!isSensitive && ev.example ? chalk.gray(` (e.g. ${ev.example})`) : ""}`,
+      mask: isSensitive ? "*" : undefined,
       validate: (input: string) => input.trim() ? true : "Required",
     }]);
     if (value.trim()) envValues[ev.name] = value.trim();

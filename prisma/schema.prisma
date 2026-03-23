@@ -33,6 +33,8 @@ model Server {
   downloadCount   Int      @default(0)
   weeklyInstalls  Int      @default(0)
   dailyInstalls   Int      @default(0)
+  avgRating       Float?   // cached average of reviews (updated on review create/delete)
+  reviewCount     Int      @default(0) // cached count of reviews
   riskLevel       String   @default("unknown") // "safe" | "low" | "medium" | "high" | "unknown"
   auditNotes      String?  // reason from last auto-audit
   auditedAt       DateTime? // when last audited
