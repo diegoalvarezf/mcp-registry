@@ -4,12 +4,15 @@
  * Used to prevent XSS in user-submitted text fields before storing them.
  */
 
+// Strip the entire content of script/style/iframe tags (not just the tags themselves)
+const DANGEROUS_CONTENT_RE = /<(script|style|iframe)[^>]*>[\s\S]*?<\/\1>/gi;
 const HTML_TAG_RE = /<[^>]*>/g;
 const NULL_BYTE_RE = /\0/g;
 
 export function stripHtml(value: string): string {
   return value
     .replace(NULL_BYTE_RE, "")
+    .replace(DANGEROUS_CONTENT_RE, "")
     .replace(HTML_TAG_RE, "")
     .trim();
 }

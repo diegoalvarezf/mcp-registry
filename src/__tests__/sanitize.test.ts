@@ -6,8 +6,8 @@ describe("stripHtml", () => {
     expect(stripHtml("<b>Hello</b>")).toBe("Hello");
   });
 
-  it("strips script tags", () => {
-    expect(stripHtml('<script>alert("xss")</script>text')).toBe('alert("xss")text');
+  it("strips script tags and their content", () => {
+    expect(stripHtml('<script>alert("xss")</script>text')).toBe("text");
   });
 
   it("strips inline event handlers", () => {
