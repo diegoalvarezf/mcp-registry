@@ -138,10 +138,20 @@ export function ServerCard({ server, featured, rank }: { server: McpServer; feat
                   : server.stars.toLocaleString()}
               </span>
             )}
-            <span className="flex items-center gap-1">
-              <IconDownload size={11} />
-              {server.downloadCount.toLocaleString()}
-            </span>
+            {server.npmDownloads > 0 ? (
+              <span className="flex items-center gap-1" title="npm weekly downloads">
+                <IconDownload size={11} />
+                {server.npmDownloads >= 1000
+                  ? `${(server.npmDownloads / 1000).toFixed(1)}k`
+                  : server.npmDownloads.toLocaleString()}
+                <span className="text-gray-700">/w</span>
+              </span>
+            ) : server.downloadCount > 0 ? (
+              <span className="flex items-center gap-1" title="CLI installs">
+                <IconDownload size={11} />
+                {server.downloadCount.toLocaleString()}
+              </span>
+            ) : null}
           </div>
         </div>
       </a>

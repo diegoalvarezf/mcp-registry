@@ -33,6 +33,7 @@ model Server {
   downloadCount   Int      @default(0)
   weeklyInstalls  Int      @default(0)
   dailyInstalls   Int      @default(0)
+  npmDownloads    Int      @default(0)  // npm weekly downloads, synced via cron
   avgRating       Float?   // cached average of reviews (updated on review create/delete)
   reviewCount     Int      @default(0) // cached count of reviews
   riskLevel       String   @default("unknown") // "safe" | "low" | "medium" | "high" | "unknown"

@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/sync-stars",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/sync-npm",
+      "schedule": "0 4 * * *"
     }
   ]
 }

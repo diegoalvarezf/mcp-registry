@@ -274,12 +274,18 @@ export default async function HomePage({
                             {s.stars >= 1000 ? `${(s.stars / 1000).toFixed(1)}k` : s.stars.toLocaleString()}
                           </span>
                         )}
-                        {s.downloadCount > 0 && (
+                        {s.npmDownloads > 0 ? (
+                          <span className="flex items-center gap-1" title="npm weekly downloads">
+                            <IconDownload size={11} />
+                            {s.npmDownloads >= 1000 ? `${(s.npmDownloads / 1000).toFixed(1)}k` : s.npmDownloads.toLocaleString()}
+                            <span className="text-gray-700">/w</span>
+                          </span>
+                        ) : s.downloadCount > 0 ? (
                           <span className="flex items-center gap-1">
                             <IconDownload size={11} />
                             {s.downloadCount.toLocaleString()}
                           </span>
-                        )}
+                        ) : null}
                         {s.avgRating && <span className="text-yellow-400 hidden sm:block">★ {s.avgRating}</span>}
                       </div>
                     </a>

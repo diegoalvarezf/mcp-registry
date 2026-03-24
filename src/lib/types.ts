@@ -31,6 +31,7 @@ export interface McpServer {
   downloadCount: number;
   weeklyInstalls: number;
   dailyInstalls: number;
+  npmDownloads: number;
   riskLevel: string;
   repoSlug: string | null;
   createdAt: Date;
