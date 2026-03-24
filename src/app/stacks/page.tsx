@@ -93,7 +93,6 @@ export default async function StacksPage() {
                       </div>
                     </div>
                     <a href={`/stacks/${stack.slug}/edit`}
-                      onClick={(e) => e.stopPropagation()}
                       className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-gray-600 hover:text-gray-400 px-2 py-1 rounded border border-gray-800 hover:border-gray-600">
                       Edit
                     </a>
