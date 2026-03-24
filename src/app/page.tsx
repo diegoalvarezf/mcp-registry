@@ -8,7 +8,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { Pagination } from "@/components/Pagination";
 import { getT } from "@/lib/i18n";
 import type { SortMode } from "@/lib/servers";
-import { IconGrid, IconList } from "@/components/Icons";
+import { IconGrid, IconList, IconStar, IconDownload } from "@/components/Icons";
 import { CliCommand } from "@/components/CliCommand";
 
 export const dynamic = "force-dynamic";
@@ -245,22 +245,46 @@ export default async function HomePage({
               {isFiltered ? `${totalCount} ${t.results}` : t.allServers}
             </h2>
             {view === "list" ? (
-              <div className="space-y-1">
-                {serversResult.servers.map((s, i) => (
-                  <a key={s.id} href={`/server/${s.slug}`}
-                    className="flex items-center gap-4 px-4 py-3 rounded-lg bg-gray-900 border border-gray-800 hover:border-gray-600 hover:bg-gray-800 transition-all group">
-                    <span className="text-xs text-gray-600 font-mono w-6 shrink-0 text-right">{(page - 1) * 24 + i + 1}</span>
-                    <div className="flex-1 min-w-0">
-                      <span className="font-medium text-white group-hover:text-blue-400 transition-colors">{s.name}</span>
-                      <span className="text-gray-500 text-sm ml-3 truncate hidden sm:inline">{s.description}</span>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0 text-xs text-gray-500">
-                      {s.downloadCount > 0 && <span>↓ {s.downloadCount.toLocaleString()}</span>}
-                      {s.avgRating && <span className="text-yellow-400">★ {s.avgRating}</span>}
-                      <span className="font-mono text-gray-600">{s.transport}</span>
-                    </div>
-                  </a>
-                ))}
+              <div className="divide-y divide-gray-800 border border-gray-800 rounded-xl overflow-hidden">
+                {serversResult.servers.map((s, i) => {
+                  const avatar = (() => {
+                    for (const url of [s.authorUrl, s.repoUrl]) {
+                      if (!url) continue;
+                      const m = url.match(/github\.com\/([^/]+)/);
+                      if (m) return `https://github.com/${m[1]}.png?size=32`;
+                    }
+                    return null;
+                  })();
+                  return (
+                    <a key={s.id} href={`/server/${s.slug}`}
+                      className="flex items-center gap-3 px-4 py-3 bg-gray-900 hover:bg-gray-800 transition-colors group">
+                      <span className="text-xs text-gray-600 font-mono w-5 shrink-0 text-right">{(page - 1) * 24 + i + 1}</span>
+                      {avatar
+                        ? <img src={avatar} alt="" className="w-7 h-7 rounded-full shrink-0 bg-gray-800" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                        : <div className="w-7 h-7 rounded-full shrink-0 bg-gray-800" />
+                      }
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium text-white group-hover:text-blue-400 transition-colors">{s.name}</span>
+                        <span className="text-gray-500 text-sm ml-3 truncate hidden sm:inline">{s.description}</span>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0 text-xs text-gray-500">
+                        {s.stars > 0 && (
+                          <span className="flex items-center gap-1 text-yellow-500/80">
+                            <IconStar size={11} />
+                            {s.stars >= 1000 ? `${(s.stars / 1000).toFixed(1)}k` : s.stars.toLocaleString()}
+                          </span>
+                        )}
+                        {s.downloadCount > 0 && (
+                          <span className="flex items-center gap-1">
+                            <IconDownload size={11} />
+                            {s.downloadCount.toLocaleString()}
+                          </span>
+                        )}
+                        {s.avgRating && <span className="text-yellow-400 hidden sm:block">★ {s.avgRating}</span>}
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -343,21 +367,41 @@ export default async function HomePage({
               {isFiltered ? `${totalCount} ${t.results}` : t.allSkills}
             </h2>
             {view === "list" ? (
-              <div className="space-y-1">
-                {skillsResult.skills.map((s, i) => (
-                  <a key={s.id} href={`/skills/${s.slug}`}
-                    className="flex items-center gap-4 px-4 py-3 rounded-lg bg-gray-900 border border-gray-800 hover:border-gray-600 hover:bg-gray-800 transition-all group">
-                    <span className="text-xs text-gray-600 font-mono w-6 shrink-0 text-right">{(page - 1) * 24 + i + 1}</span>
-                    <div className="flex-1 min-w-0">
-                      <span className="font-medium text-white group-hover:text-purple-400 transition-colors">{s.name}</span>
-                      <span className="text-gray-500 text-sm ml-3 truncate hidden sm:inline">{s.description}</span>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0 text-xs text-gray-500">
-                      {s.installCount > 0 && <span>↓ {s.installCount.toLocaleString()}</span>}
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-purple-500/10 border border-purple-500/20 text-purple-400">/{s.slug}</span>
-                    </div>
-                  </a>
-                ))}
+              <div className="divide-y divide-gray-800 border border-gray-800 rounded-xl overflow-hidden">
+                {skillsResult.skills.map((s, i) => {
+                  const avatar = s.authorUrl?.match(/github\.com\/([^/]+)/)?.[1]
+                    ? `https://github.com/${s.authorUrl!.match(/github\.com\/([^/]+)/)![1]}.png?size=32`
+                    : null;
+                  return (
+                    <a key={s.id} href={`/skills/${s.slug}`}
+                      className="flex items-center gap-3 px-4 py-3 bg-gray-900 hover:bg-gray-800 transition-colors group">
+                      <span className="text-xs text-gray-600 font-mono w-5 shrink-0 text-right">{(page - 1) * 24 + i + 1}</span>
+                      {avatar
+                        ? <img src={avatar} alt="" className="w-7 h-7 rounded-full shrink-0 bg-gray-800" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                        : <div className="w-7 h-7 rounded-full shrink-0 bg-gray-800" />
+                      }
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium text-white group-hover:text-purple-400 transition-colors">{s.name}</span>
+                        <span className="text-gray-500 text-sm ml-3 truncate hidden sm:inline">{s.description}</span>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0 text-xs text-gray-500">
+                        {(s as any).stars > 0 && (
+                          <span className="flex items-center gap-1 text-yellow-500/80">
+                            <IconStar size={11} />
+                            {(s as any).stars >= 1000 ? `${((s as any).stars / 1000).toFixed(1)}k` : (s as any).stars.toLocaleString()}
+                          </span>
+                        )}
+                        {s.installCount > 0 && (
+                          <span className="flex items-center gap-1">
+                            <IconDownload size={11} />
+                            {s.installCount.toLocaleString()}
+                          </span>
+                        )}
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-purple-500/10 border border-purple-500/20 text-purple-400 hidden sm:block">/{s.slug}</span>
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -437,20 +481,40 @@ export default async function HomePage({
               {isFiltered ? `${totalCount} ${t.results}` : t.allAgents}
             </h2>
             {view === "list" ? (
-              <div className="space-y-1">
-                {agentsResult.skills.map((s, i) => (
-                  <a key={s.id} href={`/agents/${s.slug}`}
-                    className="flex items-center gap-4 px-4 py-3 rounded-lg bg-gray-900 border border-gray-800 hover:border-gray-600 hover:bg-gray-800 transition-all group">
-                    <span className="text-xs text-gray-600 font-mono w-6 shrink-0 text-right">{(page - 1) * 24 + i + 1}</span>
-                    <div className="flex-1 min-w-0">
-                      <span className="font-medium text-white group-hover:text-orange-400 transition-colors">{s.name}</span>
-                      <span className="text-gray-500 text-sm ml-3 truncate hidden sm:inline">{s.description}</span>
-                    </div>
-                    {s.installCount > 0 && (
-                      <span className="shrink-0 text-xs text-gray-500">↓ {s.installCount.toLocaleString()}</span>
-                    )}
-                  </a>
-                ))}
+              <div className="divide-y divide-gray-800 border border-gray-800 rounded-xl overflow-hidden">
+                {agentsResult.skills.map((s, i) => {
+                  const avatar = s.authorUrl?.match(/github\.com\/([^/]+)/)?.[1]
+                    ? `https://github.com/${s.authorUrl!.match(/github\.com\/([^/]+)/)![1]}.png?size=32`
+                    : null;
+                  return (
+                    <a key={s.id} href={`/agents/${s.slug}`}
+                      className="flex items-center gap-3 px-4 py-3 bg-gray-900 hover:bg-gray-800 transition-colors group">
+                      <span className="text-xs text-gray-600 font-mono w-5 shrink-0 text-right">{(page - 1) * 24 + i + 1}</span>
+                      {avatar
+                        ? <img src={avatar} alt="" className="w-7 h-7 rounded-full shrink-0 bg-gray-800" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                        : <div className="w-7 h-7 rounded-full shrink-0 bg-gray-800" />
+                      }
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium text-white group-hover:text-orange-400 transition-colors">{s.name}</span>
+                        <span className="text-gray-500 text-sm ml-3 truncate hidden sm:inline">{s.description}</span>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0 text-xs text-gray-500">
+                        {(s as any).stars > 0 && (
+                          <span className="flex items-center gap-1 text-yellow-500/80">
+                            <IconStar size={11} />
+                            {(s as any).stars >= 1000 ? `${((s as any).stars / 1000).toFixed(1)}k` : (s as any).stars.toLocaleString()}
+                          </span>
+                        )}
+                        {s.installCount > 0 && (
+                          <span className="flex items-center gap-1">
+                            <IconDownload size={11} />
+                            {s.installCount.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">

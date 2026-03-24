@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { Skill } from "@prisma/client";
 import { parseTags } from "@/lib/skills-db";
 import { useT } from "@/lib/use-t";
-import { IconCheck, IconDownload } from "@/components/Icons";
+import { IconCheck, IconDownload, IconStar } from "@/components/Icons";
 
 function getGithubAvatar(authorUrl?: string | null): string | null {
   if (!authorUrl) return null;
@@ -69,12 +69,22 @@ export function AgentCard({ skill, featured }: { skill: Skill; featured?: boolea
         {/* Footer */}
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span className="truncate">{skill.authorName}</span>
-          {skill.installCount > 0 && (
-            <span className="shrink-0 ml-2 flex items-center gap-1">
-              <IconDownload size={11} />
-              {skill.installCount.toLocaleString()}
-            </span>
-          )}
+          <div className="flex items-center gap-3 shrink-0 ml-2">
+            {(skill as any).stars > 0 && (
+              <span className="flex items-center gap-1 text-yellow-500/80">
+                <IconStar size={11} />
+                {(skill as any).stars >= 1000
+                  ? `${((skill as any).stars / 1000).toFixed(1)}k`
+                  : (skill as any).stars.toLocaleString()}
+              </span>
+            )}
+            {skill.installCount > 0 && (
+              <span className="flex items-center gap-1">
+                <IconDownload size={11} />
+                {skill.installCount.toLocaleString()}
+              </span>
+            )}
+          </div>
         </div>
       </a>
 

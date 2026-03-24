@@ -62,6 +62,7 @@ model Skill {
   installCount   Int      @default(0)
   weeklyInstalls Int      @default(0)
   dailyInstalls  Int      @default(0)
+  stars          Int      @default(0)
   ownerId        String?
   owner        User?    @relation(fields: [ownerId], references: [id])
   createdBy    String?  // githubLogin
