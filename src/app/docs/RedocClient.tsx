@@ -16,16 +16,36 @@ export function RedocClient({ specUrl }: { specUrl: string }) {
       specUrl,
       {
         theme: {
-          colors: { primary: { main: "#6366f1" } },
-          sidebar: { backgroundColor: "#111827", textColor: "#d1d5db" },
-          rightPanel: { backgroundColor: "#1f2937" },
-          typography: { fontFamily: "Inter, system-ui, sans-serif", fontSize: "15px" },
+          colors: {
+            primary: { main: "#6366f1" },
+            success: { main: "#22c55e" },
+            error:   { main: "#ef4444" },
+          },
+          sidebar: {
+            backgroundColor: "#0f172a",
+            textColor: "#cbd5e1",
+            activeTextColor: "#a5b4fc",
+            groupItems: { textTransform: "uppercase" },
+          },
+          rightPanel: { backgroundColor: "#1e293b" },
+          codeBlock: { backgroundColor: "#0f172a" },
+          typography: {
+            fontFamily: "Inter, system-ui, sans-serif",
+            fontSize: "14px",
+            lineHeight: "1.6",
+            headings: { fontFamily: "Inter, system-ui, sans-serif" },
+            code: { fontFamily: "JetBrains Mono, Fira Code, monospace", fontSize: "13px" },
+          },
         },
         hideDownloadButton: false,
         expandResponses: "200,201",
+        showExtensions: false,
         sortPropsAlphabetically: false,
+        requiredPropsFirst: true,
         hideHostname: false,
         noAutoAuth: false,
+        pathInMiddlePanel: false,
+        scrollYOffset: 60,
       },
       containerRef.current
     );

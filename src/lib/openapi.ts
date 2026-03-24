@@ -116,21 +116,6 @@ const Stack = {
   },
 };
 
-const Team = {
-  type: "object",
-  properties: {
-    id:          { type: "string" },
-    slug:        { type: "string" },
-    name:        { type: "string" },
-    description: { type: "string", nullable: true },
-    inviteToken: { type: "string" },
-    role:        { type: "string", enum: ["owner", "member"] },
-    memberCount: { type: "integer" },
-    serverCount: { type: "integer" },
-    createdAt:   { type: "string", format: "date-time" },
-  },
-};
-
 const ErrorResponse = {
   type: "object",
   properties: {
@@ -165,21 +150,41 @@ export function buildOpenApiSpec() {
       title: "MCPHub API",
       version: "1.0.0",
       description: `
-The MCPHub public API lets you discover, search, and manage MCP servers, skills, and stacks.
+The MCPHub public REST API lets you discover, search, and integrate MCP servers, skills, and stacks into your own tooling, CLIs, and AI workflows.
+
+## Base URL
+
+\`\`\`
+${REGISTRY_URL}
+\`\`\`
 
 ## Authentication
 
-Endpoints marked 🔒 require a valid GitHub OAuth session (cookie-based when used from the web UI).
-For programmatic access, authenticate via the \`/auth/signin\` flow.
+Most read endpoints are public. Endpoints marked **🔒** require a GitHub OAuth session.
+
+Sign in at [\`/auth/signin\`](${REGISTRY_URL}/auth/signin) — the session cookie is set automatically and sent with every subsequent request from the browser or CLI.
 
 ## Rate limits
 
-Write endpoints are rate-limited per IP:
-- **POST /api/servers** — 5 requests / hour
-- **POST /api/skills** — 10 requests / hour
-- **POST /api/servers/{slug}/reviews** — 10 requests / hour
+Write endpoints are rate-limited **per IP**:
 
-Rate-limited responses return HTTP **429** with a \`Retry-After\` header.
+| Endpoint | Limit |
+|---|---|
+| \`POST /api/servers\` | 5 req / hour |
+| \`POST /api/skills\` | 10 req / hour |
+| \`POST /api/servers/{slug}/reviews\` | 10 req / hour |
+
+Rate-limited responses return HTTP **429** with a \`Retry-After\` header (seconds until reset).
+
+## Errors
+
+All error responses share the same shape:
+
+\`\`\`json
+{ "error": "Human-readable message" }
+\`\`\`
+
+Common status codes: **400** Bad request · **401** Unauthenticated · **403** Forbidden · **404** Not found · **409** Conflict (duplicate slug) · **422** Validation failed · **429** Rate limited.
       `.trim(),
       contact: {
         name: "MCPHub",
@@ -189,14 +194,18 @@ Rate-limited responses return HTTP **429** with a \`Retry-After\` header.
     },
     servers: [{ url: REGISTRY_URL, description: "Production" }],
     tags: [
-      { name: "Servers",  description: "MCP server registry — discover and publish MCP servers" },
-      { name: "Reviews",  description: "Community reviews and ratings for servers" },
-      { name: "Skills",   description: "Reusable prompts and agents" },
-      { name: "Stacks",   description: "Curated collections of servers and skills" },
-      { name: "Teams",    description: "Team workspaces with shared server/skill lists" },
+      { name: "Servers",  description: "MCP server registry — discover, search, and publish MCP servers" },
+      { name: "Reviews",  description: "Community reviews and star ratings for servers" },
+      { name: "Skills",   description: "Reusable slash-command prompts and AI agents" },
+      { name: "Stacks",   description: "Curated collections grouping servers, skills, and agents for a specific workflow" },
+    ],
+    "x-tagGroups": [
+      { name: "Registry", tags: ["Servers", "Reviews"] },
+      { name: "Prompts & Agents", tags: ["Skills"] },
+      { name: "Collections", tags: ["Stacks"] },
     ],
     components: {
-      schemas: { EnvVar, Server, Review, Skill, Stack, Team, ErrorResponse, ValidationError },
+      schemas: { EnvVar, Server, Review, Skill, Stack, ErrorResponse, ValidationError },
       securitySchemes: {
         cookieAuth: {
           type: "apiKey",
@@ -647,237 +656,6 @@ Rate-limited responses return HTTP **429** with a \`Retry-After\` header.
         },
       },
 
-      // ── Teams ────────────────────────────────────────────────────────────────
-
-      "/api/teams": {
-        get: {
-          tags: ["Teams"],
-          summary: "List my teams 🔒",
-          description: "Returns all teams the authenticated user belongs to.",
-          operationId: "listTeams",
-          security: [{ cookieAuth: [] }],
-          responses: {
-            200: { description: "OK", content: { "application/json": { schema: { type: "object", properties: { teams: { type: "array", items: { "$ref": "#/components/schemas/Team" } } } } } } },
-            401: r401,
-          },
-        },
-        post: {
-          tags: ["Teams"],
-          summary: "Create team 🔒",
-          operationId: "createTeam",
-          security: [{ cookieAuth: [] }],
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  required: ["name"],
-                  properties: {
-                    name:        { type: "string", minLength: 2, maxLength: 50 },
-                    description: { type: "string", maxLength: 200 },
-                  },
-                },
-              },
-            },
-          },
-          responses: {
-            201: { description: "Created", content: { "application/json": { schema: { type: "object", properties: { team: { "$ref": "#/components/schemas/Team" } } } } } },
-            401: r401, 422: r422,
-          },
-        },
-      },
-
-      "/api/teams/{slug}": {
-        get: {
-          tags: ["Teams"],
-          summary: "Get team 🔒",
-          description: "Returns full team details including members and servers. Must be a team member.",
-          operationId: "getTeam",
-          security: [{ cookieAuth: [] }],
-          parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }],
-          responses: {
-            200: {
-              description: "OK",
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "object",
-                    properties: {
-                      team: { "$ref": "#/components/schemas/Team" },
-                      role: { type: "string", enum: ["owner", "member"] },
-                    },
-                  },
-                },
-              },
-            },
-            401: r401, 404: r404,
-          },
-        },
-        delete: {
-          tags: ["Teams"],
-          summary: "Delete team 🔒",
-          description: "Deletes a team and all its memberships. Owner only.",
-          operationId: "deleteTeam",
-          security: [{ cookieAuth: [] }],
-          parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }],
-          responses: {
-            200: { description: "OK", content: { "application/json": { schema: { type: "object", properties: { ok: { type: "boolean" } } } } } },
-            401: r401, 403: r403, 404: r404,
-          },
-        },
-      },
-
-      "/api/teams/{slug}/servers": {
-        post: {
-          tags: ["Teams"],
-          summary: "Add server to team 🔒",
-          operationId: "addTeamServer",
-          security: [{ cookieAuth: [] }],
-          parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }],
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  required: ["serverSlug"],
-                  properties: {
-                    serverSlug: { type: "string" },
-                    notes:      { type: "string" },
-                  },
-                },
-              },
-            },
-          },
-          responses: {
-            200: { description: "OK (upserted)" },
-            401: r401, 404: r404, 422: r422,
-          },
-        },
-        delete: {
-          tags: ["Teams"],
-          summary: "Remove server from team 🔒",
-          operationId: "removeTeamServer",
-          security: [{ cookieAuth: [] }],
-          parameters: [
-            { name: "slug",   in: "path",  required: true, schema: { type: "string" } },
-            { name: "server", in: "query", required: true, schema: { type: "string" }, description: "Server slug to remove" },
-          ],
-          responses: {
-            200: { description: "OK" },
-            401: r401, 404: r404,
-          },
-        },
-      },
-
-      "/api/teams/{slug}/skills": {
-        get: {
-          tags: ["Teams"],
-          summary: "List team skills 🔒",
-          operationId: "listTeamSkills",
-          security: [{ cookieAuth: [] }],
-          parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }],
-          responses: {
-            200: { description: "OK", content: { "application/json": { schema: { type: "array", items: { "$ref": "#/components/schemas/Skill" } } } } },
-            401: r401, 403: r403, 404: r404,
-          },
-        },
-        post: {
-          tags: ["Teams"],
-          summary: "Create team skill 🔒",
-          description: "Creates a custom skill (slash command) for the team. Owner only.",
-          operationId: "createTeamSkill",
-          security: [{ cookieAuth: [] }],
-          parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }],
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  required: ["name", "slug", "content"],
-                  properties: {
-                    name:        { type: "string" },
-                    slug:        { type: "string", description: "Used as the slash command name, e.g. 'review-pr'" },
-                    type:        { type: "string", enum: ["prompt", "agent"], default: "prompt" },
-                    description: { type: "string" },
-                    content:     { type: "string" },
-                  },
-                },
-              },
-            },
-          },
-          responses: {
-            201: { description: "Created" },
-            401: r401, 403: r403, 404: r404, 409: r409,
-          },
-        },
-      },
-
-      "/api/teams/{slug}/skills/{skillSlug}": {
-        delete: {
-          tags: ["Teams"],
-          summary: "Remove team skill 🔒",
-          description: "Removes a custom skill from a team. Owner only.",
-          operationId: "deleteTeamSkill",
-          security: [{ cookieAuth: [] }],
-          parameters: [
-            { name: "slug",      in: "path", required: true, schema: { type: "string" } },
-            { name: "skillSlug", in: "path", required: true, schema: { type: "string" } },
-          ],
-          responses: {
-            200: { description: "OK" },
-            401: r401, 403: r403, 404: r404,
-          },
-        },
-      },
-
-      "/api/teams/{slug}/sync": {
-        get: {
-          tags: ["Teams"],
-          summary: "Sync team config",
-          description: "Returns the full team configuration (servers + skills) for CLI sync. Authenticated via invite token instead of session.",
-          operationId: "syncTeam",
-          parameters: [
-            { name: "slug",  in: "path",  required: true, schema: { type: "string" } },
-            { name: "token", in: "query", required: true, schema: { type: "string" }, description: "Team invite token" },
-          ],
-          responses: {
-            200: {
-              description: "OK",
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "object",
-                    properties: {
-                      team:    { type: "object", properties: { slug: { type: "string" }, name: { type: "string" } } },
-                      servers: { type: "array", items: { "$ref": "#/components/schemas/Server" } },
-                      skills:  { type: "array", items: { "$ref": "#/components/schemas/Skill" } },
-                    },
-                  },
-                },
-              },
-            },
-            403: r403, 404: r404,
-          },
-        },
-      },
-
-      "/api/join/{token}": {
-        post: {
-          tags: ["Teams"],
-          summary: "Join team via invite link 🔒",
-          description: "Adds the authenticated user to a team using an invite token.",
-          operationId: "joinTeam",
-          security: [{ cookieAuth: [] }],
-          parameters: [{ name: "token", in: "path", required: true, schema: { type: "string" }, description: "Team invite token" }],
-          responses: {
-            302: { description: "Redirect to /teams/{slug} on success" },
-            401: r401, 404: r404,
-          },
-        },
-      },
     },
   };
 }

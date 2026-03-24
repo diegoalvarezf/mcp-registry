@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import {
-  Upload, BookOpen, Users, Settings2, Moon, Sun,
+  Upload, BookOpen, Moon, Sun,
   Globe, LogOut, LogIn, ChevronDown, Shield,
 } from "lucide-react";
 import { signOutAction } from "@/app/actions";
@@ -93,7 +93,6 @@ export function NavProfile({ user }: Props) {
           <div className="py-1">
             <DropItem href="/submit" icon={<Upload size={14} />} onClick={() => setOpen(false)}>{t.submit}</DropItem>
             <DropItem href="/library" icon={<BookOpen size={14} />} onClick={() => setOpen(false)}>{t.library}</DropItem>
-            <DropItem href="/teams" icon={<Users size={14} />} onClick={() => setOpen(false)}>{t.teams}</DropItem>
             {user.role === "admin" && (
               <DropItem href="/admin" icon={<Shield size={14} />} onClick={() => setOpen(false)} yellow>{t.admin}</DropItem>
             )}
