@@ -385,10 +385,10 @@ export default async function HomePage({
                         <span className="text-gray-500 text-sm ml-3 truncate hidden sm:inline">{s.description}</span>
                       </div>
                       <div className="flex items-center gap-3 shrink-0 text-xs text-gray-500">
-                        {(s as any).stars > 0 && (
+                        {s.stars > 0 && (
                           <span className="flex items-center gap-1 text-yellow-500/80">
                             <IconStar size={11} />
-                            {(s as any).stars >= 1000 ? `${((s as any).stars / 1000).toFixed(1)}k` : (s as any).stars.toLocaleString()}
+                            {s.stars >= 1000 ? `${(s.stars / 1000).toFixed(1)}k` : s.stars.toLocaleString()}
                           </span>
                         )}
                         {s.installCount > 0 && (
@@ -499,10 +499,10 @@ export default async function HomePage({
                         <span className="text-gray-500 text-sm ml-3 truncate hidden sm:inline">{s.description}</span>
                       </div>
                       <div className="flex items-center gap-3 shrink-0 text-xs text-gray-500">
-                        {(s as any).stars > 0 && (
+                        {s.stars > 0 && (
                           <span className="flex items-center gap-1 text-yellow-500/80">
                             <IconStar size={11} />
-                            {(s as any).stars >= 1000 ? `${((s as any).stars / 1000).toFixed(1)}k` : (s as any).stars.toLocaleString()}
+                            {s.stars >= 1000 ? `${(s.stars / 1000).toFixed(1)}k` : s.stars.toLocaleString()}
                           </span>
                         )}
                         {s.installCount > 0 && (

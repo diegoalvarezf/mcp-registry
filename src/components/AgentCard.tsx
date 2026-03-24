@@ -70,12 +70,12 @@ export function AgentCard({ skill, featured }: { skill: Skill; featured?: boolea
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span className="truncate">{skill.authorName}</span>
           <div className="flex items-center gap-3 shrink-0 ml-2">
-            {(skill as any).stars > 0 && (
+            {skill.stars > 0 && (
               <span className="flex items-center gap-1 text-yellow-500/80">
                 <IconStar size={11} />
-                {(skill as any).stars >= 1000
-                  ? `${((skill as any).stars / 1000).toFixed(1)}k`
-                  : (skill as any).stars.toLocaleString()}
+                {skill.stars >= 1000
+                  ? `${(skill.stars / 1000).toFixed(1)}k`
+                  : skill.stars.toLocaleString()}
               </span>
             )}
             {skill.installCount > 0 && (

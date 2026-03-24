@@ -24,46 +24,53 @@ async function fetchStars(owner: string, repo: string): Promise<number | null> {
   return typeof data.stargazers_count === "number" ? data.stargazers_count : null;
 }
 
+async function syncBatch<T extends { id: string; repoUrl: string | null; stars: number }>(
+  items: T[],
+  updateFn: (id: string, stars: number) => Promise<void>,
+): Promise<{ updated: number; failed: number }> {
+  let updated = 0;
+  let failed = 0;
+  const BATCH = 10;
+
+  for (let i = 0; i < items.length; i += BATCH) {
+    await Promise.all(
+      items.slice(i, i + BATCH).map(async (item) => {
+        if (!item.repoUrl) { failed++; return; }
+        const ownerRepo = extractOwnerRepo(item.repoUrl);
+        if (!ownerRepo) { failed++; return; }
+        const stars = await fetchStars(ownerRepo.owner, ownerRepo.repo);
+        if (stars === null) { failed++; return; }
+        if (stars !== item.stars) await updateFn(item.id, stars);
+        updated++;
+      })
+    );
+    if (i + BATCH < items.length) await new Promise((r) => setTimeout(r, 500));
+  }
+
+  return { updated, failed };
+}
+
 export async function GET(req: NextRequest) {
   if (req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const servers = await prisma.server.findMany({
-    select: { id: true, repoUrl: true, stars: true },
+  const [servers, skills] = await Promise.all([
+    prisma.server.findMany({ select: { id: true, repoUrl: true, stars: true } }),
+    prisma.skill.findMany({ where: { repoUrl: { not: null } }, select: { id: true, repoUrl: true, stars: true } }),
+  ]);
+
+  const [serverResult, skillResult] = await Promise.all([
+    syncBatch(servers, (id, stars) =>
+      prisma.server.update({ where: { id }, data: { stars } }).then(() => {})),
+    syncBatch(
+      skills.map(s => ({ ...s, repoUrl: s.repoUrl ?? "" })),
+      (id, stars) => prisma.skill.update({ where: { id }, data: { stars } }).then(() => {})),
+  ]);
+
+  return NextResponse.json({
+    ok: true,
+    servers: { total: servers.length, ...serverResult },
+    skills: { total: skills.length, ...skillResult },
   });
-
-  let updated = 0;
-  let failed = 0;
-
-  // Process in batches of 10 to respect GitHub rate limits
-  const BATCH = 10;
-  for (let i = 0; i < servers.length; i += BATCH) {
-    const batch = servers.slice(i, i + BATCH);
-
-    await Promise.all(
-      batch.map(async (server) => {
-        const ownerRepo = extractOwnerRepo(server.repoUrl);
-        if (!ownerRepo) { failed++; return; }
-
-        const stars = await fetchStars(ownerRepo.owner, ownerRepo.repo);
-        if (stars === null) { failed++; return; }
-
-        if (stars !== server.stars) {
-          await prisma.server.update({
-            where: { id: server.id },
-            data: { stars },
-          });
-        }
-        updated++;
-      })
-    );
-
-    // Small delay between batches to avoid hitting rate limits
-    if (i + BATCH < servers.length) {
-      await new Promise((r) => setTimeout(r, 500));
-    }
-  }
-
-  return NextResponse.json({ ok: true, total: servers.length, updated, failed });
 }
