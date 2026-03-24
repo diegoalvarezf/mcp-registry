@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import {
-  Upload, BookOpen, Moon, Sun,
-  Globe, LogOut, LogIn, ChevronDown, Shield,
+  Upload, BookOpen, Moon, Sun, Settings,
+  Globe, LogOut, LogIn, ChevronDown, Shield, ChevronRight,
 } from "lucide-react";
 import { signOutAction } from "@/app/actions";
 import { getT, type Lang } from "@/lib/i18n";
@@ -18,6 +18,7 @@ interface Props {
 
 export function NavProfile({ user }: Props) {
   const [open, setOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [lang, setLang] = useState<Lang>("en");
   const ref = useRef<HTMLDivElement>(null);
@@ -33,7 +34,10 @@ export function NavProfile({ user }: Props) {
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setSettingsOpen(false);
+      }
     }
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
@@ -51,7 +55,6 @@ export function NavProfile({ user }: Props) {
     setLang(next);
     localStorage.setItem("lang", next);
     document.cookie = `lang=${next};path=/;max-age=31536000`;
-    // Reload so server components pick up the new language
     window.location.reload();
   }
 
@@ -70,7 +73,7 @@ export function NavProfile({ user }: Props) {
   return (
     <div className="relative" ref={ref}>
       <button
-        onClick={() => setOpen(o => !o)}
+        onClick={() => { setOpen(o => !o); setSettingsOpen(false); }}
         className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
         aria-label="Profile menu"
       >
@@ -93,49 +96,67 @@ export function NavProfile({ user }: Props) {
           <div className="py-1">
             <DropItem href="/submit" icon={<Upload size={14} />} onClick={() => setOpen(false)}>{t.submit}</DropItem>
             <DropItem href="/library" icon={<BookOpen size={14} />} onClick={() => setOpen(false)}>{t.library}</DropItem>
-            {user.role === "admin" && (
-              <DropItem href="/admin" icon={<Shield size={14} />} onClick={() => setOpen(false)} yellow>{t.admin}</DropItem>
-            )}
           </div>
 
           {/* Settings */}
           <div className="border-t border-gray-800 py-1">
-            {/* Theme */}
             <button
-              onClick={() => applyTheme(theme === "dark" ? "light" : "dark")}
+              onClick={() => setSettingsOpen(o => !o)}
               className="w-full flex items-center justify-between px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
             >
               <span className="flex items-center gap-2.5">
-                {theme === "dark" ? <Moon size={14} className="text-gray-400" /> : <Sun size={14} className="text-gray-400" />}
-                {t.theme}
+                <Settings size={14} className="text-gray-500" />
+                {t.settings}
               </span>
-              <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">
-                {theme === "dark" ? t.dark : t.light}
-              </span>
+              <ChevronRight size={12} className={`text-gray-500 transition-transform duration-150 ${settingsOpen ? "rotate-90" : ""}`} />
             </button>
 
-            {/* Language */}
-            <div className="flex items-center justify-between px-4 py-2">
-              <span className="flex items-center gap-2.5 text-sm text-gray-300">
-                <Globe size={14} className="text-gray-400" />
-                {t.language}
-              </span>
-              <div className="flex gap-1">
-                {(["en", "es"] as Lang[]).map(l => (
+            {settingsOpen && (
+              <div className="bg-gray-800/40 border-t border-b border-gray-800/60 px-4 py-3 space-y-3">
+                {/* Theme */}
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-xs text-gray-400">
+                    {theme === "dark" ? <Moon size={12} className="text-gray-500" /> : <Sun size={12} className="text-gray-500" />}
+                    {t.theme}
+                  </span>
                   <button
-                    key={l}
-                    onClick={() => applyLang(l)}
-                    className={`px-2 py-0.5 rounded-md text-xs font-medium transition-colors ${
-                      lang === l
-                        ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
-                        : "text-gray-500 hover:text-gray-300 border border-transparent"
+                    onClick={() => applyTheme(theme === "dark" ? "light" : "dark")}
+                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border-2 border-transparent transition-colors ${
+                      theme === "light" ? "bg-blue-600" : "bg-gray-700"
                     }`}
                   >
-                    {l.toUpperCase()}
+                    <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${theme === "light" ? "translate-x-4" : "translate-x-0.5"}`} />
                   </button>
-                ))}
+                </div>
+
+                {/* Language */}
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-xs text-gray-400">
+                    <Globe size={12} className="text-gray-500" />
+                    {t.language}
+                  </span>
+                  <div className="flex gap-1">
+                    {(["en", "es"] as Lang[]).map(l => (
+                      <button
+                        key={l}
+                        onClick={() => applyLang(l)}
+                        className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
+                          lang === l
+                            ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                            : "text-gray-500 hover:text-gray-300 border border-transparent"
+                        }`}
+                      >
+                        {l.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
+
+            {user.role === "admin" && (
+              <DropItem href="/admin" icon={<Shield size={14} />} onClick={() => setOpen(false)} yellow>{t.admin}</DropItem>
+            )}
           </div>
 
           {/* Sign out */}

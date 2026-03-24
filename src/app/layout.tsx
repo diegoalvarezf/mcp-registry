@@ -38,14 +38,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <a href="/audits" className="hover:text-white transition-colors hidden md:block text-sm">Audits</a>
             <a href="/docs" className="hover:text-white transition-colors hidden md:block text-sm">API</a>
             <a href="/install-cli" className="hover:text-white transition-colors hidden sm:block">{t.cli}</a>
-            <a
-              href="https://modelcontextprotocol.io"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors hidden md:block"
-            >
-              {t.docs}
-            </a>
             <NavProfile user={session?.user ?? null} />
             <MobileMenu links={[
               { label: t.stacks, href: "/stacks" },
@@ -53,13 +45,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               { label: "Audits", href: "/audits" },
               { label: "API", href: "/docs" },
               { label: t.cli, href: "/install-cli" },
-              { label: t.docs, href: "https://modelcontextprotocol.io", external: true },
             ]} />
           </div>
         </nav>
         <main>{children}</main>
         <footer className="border-t border-gray-800 px-6 py-8 mt-20 text-center text-sm text-gray-500">
-          {t.footer}
+          <p>{t.footer}</p>
+          <div className="flex items-center justify-center gap-6 mt-3 text-xs text-gray-600">
+            <a href="/docs" className="hover:text-gray-400 transition-colors">API</a>
+            <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 transition-colors">MCP Docs ↗</a>
+            <a href="/audits" className="hover:text-gray-400 transition-colors">Audits</a>
+          </div>
         </footer>
       </body>
     </html>
