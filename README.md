@@ -1,29 +1,36 @@
-# MCP Registry 🗂️
+# MCP Registry
 
-> The open registry for Model Context Protocol servers. Discover, publish, and rate MCP servers for Claude Code, Cursor, Continue, and more.
+> The open hub for MCP servers, skills, agents & stacks — discover, install, and publish in one command.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status: WIP](https://img.shields.io/badge/status-work--in--progress-orange)]()
+[![Status: Active](https://img.shields.io/badge/status-active-brightgreen)]()
+
+**[mcp-registry-sigma.vercel.app](https://mcp-registry-sigma.vercel.app)**
 
 ## What is this?
 
 The MCP ecosystem is growing fast and there's no central place to discover servers. MCP Registry fixes that — think npm registry but for MCP servers.
 
 - **Discover** servers by name, tag, tool, or compatible client
-- **Publish** your own server (coming soon)
+- **Publish** your own server
 - **Rate and review** servers you've used
+- **Security auditing** with a 4-tier trust system
 
 ## Stack
 
-- **Next.js 14** (App Router) + TypeScript
+- **Next.js 15** (App Router) + TypeScript
 - **Tailwind CSS** — dark mode UI
-- **SQLite + Prisma** — simple, zero-config database
-- **Fuse.js** — fuzzy search
+- **PostgreSQL + Prisma**
+- **GitHub OAuth**
+- **i18n** — EN / ES
 
 ## Development
 
 ```bash
+git clone https://github.com/diegoalvarezf/mcp-registry.git
+cd mcp-registry
 npm install
+cp .env.example .env.local
 npx prisma db push
 npm run db:seed
 npm run dev
@@ -38,9 +45,12 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Tag and client filters
 - [x] Submit a server (form + API)
 - [x] Public API (`GET /api/servers`, `POST /api/servers`)
-- [x] Ratings and reviews (star rating + comments)
-- [ ] GitHub OAuth for publishing
-- [ ] CLI: `mcp publish`
+- [x] Ratings and reviews
+- [x] GitHub OAuth
+- [x] Security auditing (4-tier trust system)
+- [x] i18n EN/ES
+- [ ] CLI: `mcp install` / `mcp publish`
+- [ ] User stacks
 
 ## Contributing
 
